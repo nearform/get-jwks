@@ -2,6 +2,7 @@
 
 const fetch = require('node-fetch')
 const MISSING_KEY_ERROR = 'No matching key found in the set.'
+const NO_KEYS_ERROR = 'No keys found in the set.'
 
 async function jwksFetch ({ domain, alg, kid, cache = null }) {
   const cacheKey = `${alg}:${kid}:${domain}`
@@ -27,6 +28,10 @@ async function jwksFetch ({ domain, alg, kid, cache = null }) {
     throw error
   }
 
+  if (!body.keys || body.keys.length === 0) {
+    throw new Error(NO_KEYS_ERROR)
+  }
+
   // Find the key with ID and algorithm matching the JWT token header
   const key = body.keys.find(k => k.alg === alg && k.kid === kid)
 
@@ -46,6 +51,4 @@ async function jwksFetch ({ domain, alg, kid, cache = null }) {
   return secret
 }
 
-module.exports = {
-  jwksFetch
-}
+module.exports = jwksFetch

@@ -4,50 +4,7 @@ const NodeCache = require('node-cache')
 const nock = require('nock')
 const t = require('tap')
 
-const { jwksFetch } = require('../src/jwks-fetch')
-
-const jwks = {
-  keys: [
-    {
-      alg: 'RS512',
-      kid: 'KEY',
-      x5c: ['UNUSED']
-    },
-    {
-      alg: 'RS256',
-      kid: 'KEY',
-      x5c: [
-        `
-MIIEnjCCAoYCCQCMoDmTYrlYFTANBgkqhkiG9w0BAQsFADARMQ8wDQYDVQQDDAZ1
-bnVzZWQwHhcNMTkxMTEyMTIzMjI0WhcNMTkxMjEyMTIzMjI0WjARMQ8wDQYDVQQD
-DAZ1bnVzZWQwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDK7ys6lJMZ
-X5kt7NfsJHKHA7QXxmoixVw2lEPuyY/n4wg73+9IcyHmWUseb1AGHyXN1dD6GkcI
-ujuFJdrzdsNuFsCQDB7YE0/ZH9sqBAp6A8qh42ZAG/A8VkMGkMzSypvEcinJ7USO
-zYv9Q3BqKEAX41uE5dMRMVNQDEcHGxhoLwGpHECJgQ2NrRFK92WQvUuyJdoVF1hG
-WXSWAGfTZUHLpG3FTK3175we8qBsqynkvegAOwzETLdExWt620dRl7gRp6hDfECH
-69tdH6Qn1FC6fBKc1zvh79NA1iJrDCNJDFzN1bGVduPgOzsorhZSpt/ESw5YEOvC
-QAHOtzNmVa+4SOOm/2eDs5X066YmmRGv9aNC5humBPwfKFdIJbhCeP6XBaG2vtSx
-wfFEyfNCKoUTPUqdmj/CTW/TEFuzFab1hRLTmwOuLe2x3B0DuAkd/+auifXwDDPN
-GVs+VySqWeu00hSVEzKZ9FdU0abGkmRqytj7xw8gPJ+jroq5ZFAyPtPUf8IpSubX
-qAl0ppsqMrn9aMEEsu+APJi8yK4pEppWVZZBqf4/iPA+rR2J9uarUIsTQY8SKAeG
-BpcOTEjXvW5nTLmAE2hse39qrT5xWp/PXxmsMR6Q3Dn/drlySoNlCGIi4L+BfS+Q
-VZfm9BxIqS/aQW5TRMpeT7QAeK6NXD3dDwIDAQABMA0GCSqGSIb3DQEBCwUAA4IC
-AQCEwcGqCjW0FDrRepfglTLLk699SjidT8+DvnXEwhN85PFT4U0ArEe5n3Cb6ray
-qPEeOVG6QjLtGUZ9PRGVAjttfDQTAEWjqzJoqyAl60jj9Tm/G65UUbfHx37+Bvbc
-jlQ1FqZ4Jr4b14uFOONh0WH92VRDR47k/WWaP5bjxbyCIGcGzohh2XyrtOtDU+hV
-BntQ0w7736bL/MSunXO8tkx+LyM/Z4+HSWiwI+fcdIib27ZVFQ3W1NnRoufsSUqo
-Noi2XJqr1oLbSGpagLiXsIr8UufOrpZ92Pool0/B4y/d6GbbK2UjxyHjGKB8fwNi
-nU/+KAI1jPJT9dSc18u6F+cz4lQkGA9hmvApmiR7tTdcBWK/+m1lOHj4H8kZ2P/H
-fZuOj1+GtJ+JTZO35d+GPJ41NVLDAm5gc3kGkDPt+XRZZLAtafPhMGK7jUzEgyLI
-MITSqxjlBT++5VV035m84N+j5XJ0rYEHvgOmWJpJN+q/nIJpidq/6HzLOLoqmM5D
-UGiOoOTZIj3/OfyolcYztNb+rYe3Ch/KbReC/h1sU/xqLJCImDyhHwSarjDdi8A3
-dWxawCwETuA17mD7o/hsRUbXM6DHZekkuWPOL25UpRzlA1dtXMQ2ac83k+U6wyRs
-7jYWkrpLCTpEJcQ0uGEQnsTsjr2oCq/KvNmDki+iMtvjhA==
-        `.trim()
-      ]
-    }
-  ]
-}
+const jwksFetch = require('../src/jwks-fetch')
 
 t.beforeEach((done, t) => {
   nock.disableNetConnect()
@@ -156,3 +113,81 @@ t.test('if a cache is present and the cached key has a value it should return th
   t.equal(cache.get(`${alg}:${kid}:${domain}`), 'super secret')
   t.end()
 })
+
+t.test('it will throw an error id no keys are found in the JWKS', async t => {
+  t.plan(1)
+  nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwksNoKeys)
+  const domain = 'https://localhost/'
+  const alg = 'RS512'
+  const kid = 'KEY'
+
+  try {
+    await jwksFetch({ domain, alg, kid })
+  } catch (e) {
+    t.equal(e.message, 'No keys found in the set.')
+  }
+
+  t.end()
+})
+
+t.test('it will throw an error id no keys are found in the JWKS', async t => {
+  t.plan(1)
+  nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwksEmptyKeys)
+  const domain = 'https://localhost/'
+  const alg = 'RS512'
+  const kid = 'KEY'
+
+  try {
+    await jwksFetch({ domain, alg, kid })
+  } catch (e) {
+    t.equal(e.message, 'No keys found in the set.')
+  }
+
+  t.end()
+})
+
+const jwks = {
+  keys: [
+    {
+      alg: 'RS512',
+      kid: 'KEY',
+      x5c: ['UNUSED']
+    },
+    {
+      alg: 'RS256',
+      kid: 'KEY',
+      x5c: [
+        `
+MIIEnjCCAoYCCQCMoDmTYrlYFTANBgkqhkiG9w0BAQsFADARMQ8wDQYDVQQDDAZ1
+bnVzZWQwHhcNMTkxMTEyMTIzMjI0WhcNMTkxMjEyMTIzMjI0WjARMQ8wDQYDVQQD
+DAZ1bnVzZWQwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDK7ys6lJMZ
+X5kt7NfsJHKHA7QXxmoixVw2lEPuyY/n4wg73+9IcyHmWUseb1AGHyXN1dD6GkcI
+ujuFJdrzdsNuFsCQDB7YE0/ZH9sqBAp6A8qh42ZAG/A8VkMGkMzSypvEcinJ7USO
+zYv9Q3BqKEAX41uE5dMRMVNQDEcHGxhoLwGpHECJgQ2NrRFK92WQvUuyJdoVF1hG
+WXSWAGfTZUHLpG3FTK3175we8qBsqynkvegAOwzETLdExWt620dRl7gRp6hDfECH
+69tdH6Qn1FC6fBKc1zvh79NA1iJrDCNJDFzN1bGVduPgOzsorhZSpt/ESw5YEOvC
+QAHOtzNmVa+4SOOm/2eDs5X066YmmRGv9aNC5humBPwfKFdIJbhCeP6XBaG2vtSx
+wfFEyfNCKoUTPUqdmj/CTW/TEFuzFab1hRLTmwOuLe2x3B0DuAkd/+auifXwDDPN
+GVs+VySqWeu00hSVEzKZ9FdU0abGkmRqytj7xw8gPJ+jroq5ZFAyPtPUf8IpSubX
+qAl0ppsqMrn9aMEEsu+APJi8yK4pEppWVZZBqf4/iPA+rR2J9uarUIsTQY8SKAeG
+BpcOTEjXvW5nTLmAE2hse39qrT5xWp/PXxmsMR6Q3Dn/drlySoNlCGIi4L+BfS+Q
+VZfm9BxIqS/aQW5TRMpeT7QAeK6NXD3dDwIDAQABMA0GCSqGSIb3DQEBCwUAA4IC
+AQCEwcGqCjW0FDrRepfglTLLk699SjidT8+DvnXEwhN85PFT4U0ArEe5n3Cb6ray
+qPEeOVG6QjLtGUZ9PRGVAjttfDQTAEWjqzJoqyAl60jj9Tm/G65UUbfHx37+Bvbc
+jlQ1FqZ4Jr4b14uFOONh0WH92VRDR47k/WWaP5bjxbyCIGcGzohh2XyrtOtDU+hV
+BntQ0w7736bL/MSunXO8tkx+LyM/Z4+HSWiwI+fcdIib27ZVFQ3W1NnRoufsSUqo
+Noi2XJqr1oLbSGpagLiXsIr8UufOrpZ92Pool0/B4y/d6GbbK2UjxyHjGKB8fwNi
+nU/+KAI1jPJT9dSc18u6F+cz4lQkGA9hmvApmiR7tTdcBWK/+m1lOHj4H8kZ2P/H
+fZuOj1+GtJ+JTZO35d+GPJ41NVLDAm5gc3kGkDPt+XRZZLAtafPhMGK7jUzEgyLI
+MITSqxjlBT++5VV035m84N+j5XJ0rYEHvgOmWJpJN+q/nIJpidq/6HzLOLoqmM5D
+UGiOoOTZIj3/OfyolcYztNb+rYe3Ch/KbReC/h1sU/xqLJCImDyhHwSarjDdi8A3
+dWxawCwETuA17mD7o/hsRUbXM6DHZekkuWPOL25UpRzlA1dtXMQ2ac83k+U6wyRs
+7jYWkrpLCTpEJcQ0uGEQnsTsjr2oCq/KvNmDki+iMtvjhA==
+        `.trim()
+      ]
+    }
+  ]
+}
+
+const jwksNoKeys = {}
+const jwksEmptyKeys = { keys: [] }
