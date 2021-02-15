@@ -14,6 +14,29 @@ npm install jwks-fetch
 
 ## Usage
 
+```
+const jwksFetch = require('jwks-fetch')
+
+
+cosnt secret = await jwksFetch({
+  domain: 'https://exampe.com/',
+  alg: 'token_alg',
+  kid: 'token_kid'
+})
+
+// if you want to use a cache to not fetch the JWKS every time
+
+const NodeCache = require('node-cache')
+const cache = new NodeCache()
+cosnt secret = await jwksFetch({
+  domain: 'https://exampe.com/',
+  alg: 'token_alg',
+  kid: 'token_kid',
+  cache
+})
+```
+
+
 ### jwksFetch
 
 Calling `jwksFetch` will fetch the [JSON Web Key](https://tools.ietf.org/html/rfc7517) Set and verify if any of the publi keys matches the `alg` and `kid` values of your JWT token.
@@ -26,7 +49,11 @@ Calling `jwksFetch` will fetch the [JSON Web Key](https://tools.ietf.org/html/rf
 #### How `jwks-fetch` uses the `cache` parameter
 
 If the `cache` parameter is provided, `jwks-fetch` will first look for a matching public key in the cache.
+
 If a match is found, it will be returned.
+
 If no match is found, `jwks-fetch` will try to fetch the JWKS from the given `domain`.
+
 Once the JWKS is fetched, `jwks-fetch` will look for a matching public key, and if found it will save it in the cache and return it.
+
 If a matching key is not found, even after fetching from the JWKS, `jwks-fetch` flags that particular combination of `domain`/`alg`/`kid` as "missing" (saving `null` in the cache). Until the specific cache key is not deleted, `jwks-fetch` will not try to fetch again the JWKS for that particular combination.
