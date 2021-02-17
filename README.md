@@ -17,7 +17,6 @@ npm install jwks-fetch
 ```javascript
 const buildJwksFetch = require('jwks-fetch')
 
-
 const jwksFetch = buildJwksFetch()
 
 const secret = await jwksFetch.getSecret({
@@ -34,7 +33,7 @@ jwksFetch.clearCache()
 
 ### getSecret
 
-Calling `jwksFetch.getSecret` will fetch the [JSON Web Key](https://tools.ietf.org/html/rfc7517), Set and verify if any of the public keys matches the `alg` and `kid` values of your JWT token.  And it will cache the secret so if called again it will not make another http request to return the secret.
+Calling the `jwksFetch.getSecret` will fetch the [JSON Web Key](https://tools.ietf.org/html/rfc7517), Set and verify if any of the public keys matches the `alg` and `kid` values of your JWT token.  And it will cache the secret so if called again it will not make another http request to return the secret.  It is asynchronous.
 
 - `domain`: A string containing the domain (ie: `https://www.example.com/`) from which the library should fetch the JWKS. `jwks-fetch` will add the JWKS location (`.well-known/jwks.json`) to form the final url (ie: `https://www.example.com/.well-known/jwks.json`).
 - `alg`: The alg header parameter represents the cryptographic algorithm used to secure the token. You will find it in your decoded JWT.
@@ -53,8 +52,7 @@ When creating the cache contructor you pass some optional parameters based off t
 ```javascript
 const buildJwksFetch = require('jwks-fetch')
 
-
-const jwksFetch = await buildJwksFetch({
+const jwksFetch = buildJwksFetch({
   max: 500,
   ttl: 60 * 1000
 })
