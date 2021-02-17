@@ -2,7 +2,7 @@
   "name": "jwks-fetch",
   "version": "1.0.0",
   "description": "Fetch utils for JWKS keys",
-  "main": "index.js",
+  "main": "src/jwks-fetch.js",
   "scripts": {
     "test": "tap",
     "lint": "eslint src/**/*.js test/**/*.js",
@@ -23,7 +23,8 @@
   },
   "homepage": "https://github.com/nearform/jwks-fetch#readme",
   "dependencies": {
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "tiny-lru": "^7.0.6"
   },
   "devDependencies": {
     "eslint": "^7.20.0",
