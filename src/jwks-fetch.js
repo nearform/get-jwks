@@ -13,11 +13,11 @@ function buildJwksFetch (cacheProps = {}) {
   async function getSecret (signatures) {
     const { domain, alg, kid } = signatures
     const cacheKey = `${alg}:${kid}:${domain}`
-    const cached = cache.get(cacheKey)
+    const cachedSecret = cache.get(cacheKey)
 
-    if (cached) {
-      return cached
-    } else if (cached === null) {
+    if (cachedSecret) {
+      return cachedSecret
+    } else if (cachedSecret === null) {
       // null is returned when a previous attempt resulted in the key missing in the JWKs - Do not attemp to fetch again
       throw new Error(MISSING_KEY_ERROR)
     }
