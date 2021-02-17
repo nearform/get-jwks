@@ -2,6 +2,9 @@
   "name": "jwks-fetch",
   "version": "1.0.0",
   "description": "Fetch utils for JWKS keys",
+  "engines": {
+    "node": ">=10"
+  },
   "main": "index.js",
   "scripts": {
     "test": "tap",
