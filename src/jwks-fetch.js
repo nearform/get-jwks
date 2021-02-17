@@ -3,16 +3,14 @@
 const fetch = require('node-fetch')
 const lru = require('tiny-lru')
 
-const MISSING_KEY_ERROR = 'No matching key found in the set.';
+const MISSING_KEY_ERROR = 'No matching key found in the set.'
 
 function buildJwksFetch (cacheProps = {}) {
+  const max = cacheProps.max || 100
+  const ttl = cacheProps.ttl || 60 * 1000
+  const cache = lru(max, ttl)
 
-  const max = cacheProps.max || 100;
-  const ttl = cacheProps.ttl || 60 * 1000;
-  const cache = lru(max, ttl);
-
-  async function getSecret(signatures) {
-
+  async function getSecret (signatures) {
     const { domain, alg, kid } = signatures
     const cacheKey = `${alg}:${kid}:${domain}`
     const cached = cache.get(cacheKey)
@@ -63,7 +61,6 @@ function buildJwksFetch (cacheProps = {}) {
     getSecret: getSecret,
     cache
   }
-
 }
 
 module.exports = buildJwksFetch
