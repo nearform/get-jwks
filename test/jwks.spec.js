@@ -70,7 +70,7 @@ t.test('if the cached key is null it would return an error', async t => {
   t.end()
 })
 
-t.test('if a cache is present and alg and kid do not match any jwks, the cache key should be set to null', async t => {
+t.test('if alg and kid do not match any jwks, the cache key should be set to null', async t => {
   t.plan(2)
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
 
@@ -90,7 +90,7 @@ t.test('if a cache is present and alg and kid do not match any jwks, the cache k
   t.end()
 })
 
-t.test('if a cache is present and the cached key is undefined it should fetch the jwks and set the key to the secret', async t => {
+t.test('if the cached key is undefined it should fetch the jwks and set the key to the secret', async t => {
   t.plan(3)
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const jwksFetch = await buildJwksFetch({ max: 100, ttl: 60 * 1000 });
@@ -106,7 +106,7 @@ t.test('if a cache is present and the cached key is undefined it should fetch th
   t.end()
 })
 
-t.test('if a cache is present and the cached key has a value it should return that value', async t => {
+t.test('if the cached key has a value it should return that value', async t => {
   t.plan(3)
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const jwksFetch = await buildJwksFetch({ max: 100, ttl: 60 * 1000 });
