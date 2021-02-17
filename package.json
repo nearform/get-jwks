@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Fetch utils for JWKS keys",
   "main": "src/jwks-fetch.js",
+  "engines": {
+    "node": ">=10"
+  },
   "scripts": {
     "test": "tap",
     "lint": "eslint src/**/*.js test/**/*.js",
