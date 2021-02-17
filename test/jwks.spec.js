@@ -20,7 +20,7 @@ t.test('should fetch the remove jwks and return an error if the request fails', 
   t.plan(2)
   nock('https://localhost/').get('/.well-known/jwks.json').reply(500, { msg: 'no good' })
   try {
-    const jwksFetch = buildJwksFetch({ max: 100, ttl: 60 * 1000 })
+    const jwksFetch = buildJwksFetch()
     await jwksFetch.getSecret({ domain: 'https://localhost/', alg: 'RS512', kid: 'KEY' })
   } catch (e) {
     t.equal(e.message, 'Internal Server Error')
@@ -33,7 +33,7 @@ t.test('should fetch the remove jwks and return an error if alg and kid do not m
   t.plan(1)
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   try {
-    const jwksFetch = buildJwksFetch({ max: 100, ttl: 60 * 1000 })
+    const jwksFetch = buildJwksFetch()
     await jwksFetch.getSecret({ domain: 'https://localhost/', alg: 'ABC', kid: 'some other KEY' })
   } catch (e) {
     t.equal(e.message, 'No matching key found in the set.')
@@ -44,7 +44,7 @@ t.test('should fetch the remove jwks and return an error if alg and kid do not m
 t.test('should fetch the remove jwks and return an the secrete if alg and kid match', async t => {
   t.plan(2)
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
-  const jwksFetch = buildJwksFetch({ max: 100, ttl: 60 * 1000 })
+  const jwksFetch = buildJwksFetch()
   const secret = await jwksFetch.getSecret({ domain: 'https://localhost/', alg: 'RS512', kid: 'KEY' })
   t.ok(secret)
   t.includes(secret, jwks.keys[0].x5c[0])
@@ -54,7 +54,7 @@ t.test('should fetch the remove jwks and return an the secrete if alg and kid ma
 t.test('if the cached key is null it would return an error', async t => {
   t.plan(1)
 
-  const jwksFetch = buildJwksFetch({ max: 100, ttl: 60 * 1000 })
+  const jwksFetch = buildJwksFetch()
   const domain = 'https://localhost/'
   const alg = 'ABC'
   const kid = 'key'
@@ -73,7 +73,7 @@ t.test('if alg and kid do not match any jwks, the cache key should be set to nul
   t.plan(2)
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
 
-  const jwksFetch = buildJwksFetch({ max: 100, ttl: 60 * 1000 })
+  const jwksFetch = buildJwksFetch()
   const domain = 'https://localhost/'
   const alg = 'ALG'
   const kid = 'KEY'
@@ -92,7 +92,7 @@ t.test('if alg and kid do not match any jwks, the cache key should be set to nul
 t.test('if the cached key is undefined it should fetch the jwks and set the key to the secret', async t => {
   t.plan(3)
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
-  const jwksFetch = buildJwksFetch({ max: 100, ttl: 60 * 1000 })
+  const jwksFetch = buildJwksFetch()
   const domain = 'https://localhost/'
   const alg = 'RS512'
   const kid = 'KEY'
@@ -108,7 +108,7 @@ t.test('if the cached key is undefined it should fetch the jwks and set the key 
 t.test('if the cached key has a value it should return that value', async t => {
   t.plan(3)
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
-  const jwksFetch = buildJwksFetch({ max: 100, ttl: 60 * 1000 })
+  const jwksFetch = buildJwksFetch()
   const domain = 'https://localhost/'
   const alg = 'RS512'
   const kid = 'KEY'
@@ -130,7 +130,7 @@ t.test('it will throw an error id no keys are found in the JWKS', async t => {
   const kid = 'KEY'
 
   try {
-    const jwksFetch = buildJwksFetch({ max: 100, ttl: 60 * 1000 })
+    const jwksFetch = buildJwksFetch()
     await jwksFetch.getSecret({ domain, alg, kid })
   } catch (e) {
     t.equal(e.message, 'No keys found in the set.')
@@ -147,7 +147,7 @@ t.test('it will throw an error id no keys are found in the JWKS', async t => {
   const kid = 'KEY'
 
   try {
-    const jwksFetch = buildJwksFetch({ max: 100, ttl: 60 * 1000 })
+    const jwksFetch = buildJwksFetch()
     await jwksFetch.getSecret({ domain, alg, kid })
   } catch (e) {
     t.equal(e.message, 'No keys found in the set.')
@@ -166,6 +166,24 @@ t.test('if initializes without any cache settings it should use default values',
   t.ok(jwksFetch.cache)
   t.equal(cache.max, 100)
   t.equal(cache.ttl, 60000)
+  t.end()
+})
+
+t.test('calling the clear cache function resets the cache and clears keys', async t => {
+  t.plan(3)
+  nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
+
+  const jwksFetch = buildJwksFetch()
+  const domain = 'https://localhost/'
+  const alg = 'RS512'
+  const kid = 'KEY'
+  const cache = jwksFetch.cache
+  const secret = await jwksFetch.getSecret({ domain, alg, kid })
+
+  t.ok(secret)
+  t.equal(cache.get(`${alg}:${kid}:${domain}`), secret)
+  await jwksFetch.clearCache()
+  t.equal(cache.get(`${alg}:${kid}:${domain}`), undefined)
   t.end()
 })
 
