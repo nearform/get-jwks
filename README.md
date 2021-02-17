@@ -14,7 +14,7 @@ npm install jwks-fetch
 
 ## Usage
 
-```
+```javascript
 const jwksFetch = require('jwks-fetch')
 
 
