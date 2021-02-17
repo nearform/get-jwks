@@ -5,9 +5,11 @@ const lru = require('tiny-lru')
 
 const MISSING_KEY_ERROR = 'No matching key found in the set.';
 
-async function buildJwksFetch (cacheProps = { max: 100, ttl: 60 * 1000 }) {
+function buildJwksFetch (cacheProps = {}) {
 
-  const cache = lru(cacheProps.max, cacheProps.ttl);
+  const max = cacheProps.max || 100;
+  const ttl = cacheProps.ttl || 60 * 1000;
+  const cache = lru(max, ttl);
 
   async function getSecret(signatures) {
 
