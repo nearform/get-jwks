@@ -4,6 +4,7 @@ const fetch = require('node-fetch')
 const lru = require('tiny-lru')
 
 const MISSING_KEY_ERROR = 'No matching key found in the set.'
+const NO_KEYS_ERROR = 'No keys found in the set.'
 
 function buildJwksFetch (cacheProps = {}) {
   const max = cacheProps.max || 100
@@ -35,7 +36,7 @@ function buildJwksFetch (cacheProps = {}) {
     }
 
     if (!body.keys || body.keys.length === 0) {
-      throw new Error('No keys found in the set.')
+      throw new Error(NO_KEYS_ERROR)
     }
 
     // Find the key with ID and algorithm matching the JWT token header
