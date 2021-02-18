@@ -51,7 +51,7 @@ t.test('should fetch the remove jwks and return an the secrete if alg and kid ma
   t.end()
 })
 
-t.test('if the cached key is null it would return an error', async t => {
+t.test('if the cached key is null it should return an error', async t => {
   t.plan(1)
 
   const jwksFetch = buildJwksFetch()
