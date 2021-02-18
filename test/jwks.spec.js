@@ -51,7 +51,7 @@ t.test('should fetch the remove jwks and return an the secrete if alg and kid ma
   t.end()
 })
 
-t.test('if the cached key is null it would return an error', async t => {
+t.test('if the cached key is null it should return an error', async t => {
   t.plan(1)
 
   const jwksFetch = buildJwksFetch()
@@ -156,7 +156,7 @@ t.test('it will throw an error id no keys are found in the JWKS', async t => {
   t.end()
 })
 
-t.test('if initializes without any cache settings it should use default values', async t => {
+t.test('if initialized without any cache settings it should use default values', async t => {
   t.plan(3)
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
 
