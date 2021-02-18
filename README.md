@@ -17,16 +17,16 @@ npm install get-jwks
 ```javascript
 const buildGetJwks = require('get-jwks')
 
-const getjwks = buildGetJwks()
+const getJwks = buildGetJwks()
 
-const secret = await getjwks.getSecret({
+const secret = await getJwks.getSecret({
   domain: 'https://exampe.com/',
   alg: 'token_alg',
   kid: 'token_kid'
 })
 
 // to clear the secret in cache
-getjwks.clearCache()
+getJwks.clearCache()
 
 ```
 
@@ -52,7 +52,7 @@ When creating the cache constructor you pass some optional parameters based off 
 ```javascript
 const buildGetJwks = require('get-jwks')
 
-const getjwks = buildGetJwks({
+const getJwks = buildGetJwks({
   max: 500,
   ttl: 60 * 1000
 })
