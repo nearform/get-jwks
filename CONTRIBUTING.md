@@ -1,4 +1,4 @@
-# Welcome to jwks-fetch!
+# Welcome to get-jwks!
 
 Please take a second to read over this before opening an issue. Providing complete information upfront will help us address any issue (and ship new features!) faster.
 

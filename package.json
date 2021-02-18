@@ -1,8 +1,8 @@
 {
-  "name": "jwks-fetch",
+  "name": "get-jwks",
   "version": "1.0.0",
   "description": "Fetch utils for JWKS keys",
-  "main": "src/jwks-fetch.js",
+  "main": "src/get-jwks.js",
   "engines": {
     "node": ">=10"
   },
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nearform/jwks-fetch.git"
+    "url": "git+https://github.com/nearform/get-jwks.git"
   },
   "keywords": [
     "jwks",
@@ -22,9 +22,9 @@
   "author": "Filippo De Santis <filippo.desantis@nearform.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/nearform/jwks-fetch/issues"
+    "url": "https://github.com/nearform/get-jwks/issues"
   },
-  "homepage": "https://github.com/nearform/jwks-fetch#readme",
+  "homepage": "https://github.com/nearform/get-jwks#readme",
   "dependencies": {
     "node-fetch": "^2.6.1",
     "tiny-lru": "^7.0.6"
