@@ -6,7 +6,7 @@ const lru = require('tiny-lru')
 const MISSING_KEY_ERROR = 'No matching key found in the set.'
 const NO_KEYS_ERROR = 'No keys found in the set.'
 
-function buildJwksFetch (cacheProps = {}) {
+function buildGetJwks (cacheProps = {}) {
   const max = cacheProps.max || 100
   const ttl = cacheProps.ttl || 60 * 1000
   const cache = lru(max, ttl)
@@ -65,4 +65,4 @@ function buildJwksFetch (cacheProps = {}) {
   }
 }
 
-module.exports = buildJwksFetch
+module.exports = buildGetJwks
