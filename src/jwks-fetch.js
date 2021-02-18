@@ -58,7 +58,7 @@ function buildJwksFetch (cacheProps = {}) {
   }
 
   return {
-    getSecret: getSecret,
+    getSecret,
     clearCache: () => cache.clear(),
     cache
   }
