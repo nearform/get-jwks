@@ -45,7 +45,7 @@ Clears the contents of the cache
 
 ### Optional cache constuctor
 
-When creating the cache contructor you pass some optional parameters based off the [tiny-lru](https://www.npmjs.com/package/tiny-lru) package.
+When creating the cache constructor you pass some optional parameters based off the [tiny-lru](https://www.npmjs.com/package/tiny-lru) package.
 - `max`: Max items to hold in cache, the default setting is 100.
 - `ttl`: Milliseconds an item will remain in cache; lazy expiration upon next get() of an item, the default setting is 60000.
 
