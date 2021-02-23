@@ -2,6 +2,7 @@
 
 const nock = require('nock')
 const t = require('tap')
+const jwkToPem = require('jwk-to-pem')
 
 const buildGetJwks = require('../src/get-jwks')
 
@@ -41,13 +42,14 @@ t.test('should fetch the remove jwks and return an error if alg and kid do not m
   t.end()
 })
 
-t.test('should fetch the remove jwks and return an the secrete if alg and kid match', async t => {
+t.test('should fetch the jwks and return a secret if alg and kid match', async t => {
   t.plan(2)
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
   const secret = await getJwks.getSecret({ domain: 'https://localhost/', alg: 'RS512', kid: 'KEY' })
+  const pem = jwkToPem(jwks.keys[1])
   t.ok(secret)
-  t.includes(secret, jwks.keys[0].x5c[0])
+  t.includes(secret, pem)
   t.end()
 })
 
@@ -99,8 +101,9 @@ t.test('if the cached key is undefined it should fetch the jwks and set the key 
   const cache = getJwks.cache
 
   const secret = await getJwks.getSecret({ domain, alg, kid })
+  const pem = jwkToPem(jwks.keys[1])
   t.ok(secret)
-  t.includes(secret, jwks.keys[0].x5c[0])
+  t.includes(secret, pem)
   t.equal(cache.get(`${alg}:${kid}:${domain}`), secret)
   t.end()
 })
@@ -187,16 +190,34 @@ t.test('calling the clear cache function resets the cache and clears keys', asyn
   t.end()
 })
 
+t.test('If an issuer provides a domain where there is a missing trailing slash, it should be handled', async t => {
+  t.plan(1)
+  nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
+  const domainWithMissingTrailingSlash = 'https://localhost'
+  const getJwks = buildGetJwks()
+  const secret = await getJwks.getSecret({ domain: domainWithMissingTrailingSlash, alg: 'RS512', kid: 'KEY' })
+  t.ok(secret)
+  t.end()
+})
+
 const jwks = {
   keys: [
     {
       alg: 'RS512',
       kid: 'KEY',
-      x5c: ['UNUSED']
+      // x5c: ['UNUSED'], // AWS cognito
+      e: "AQAB",
+      kty: "RSA",
+      n: "n",
+      use: 'sig'
     },
     {
       alg: 'RS256',
       kid: 'KEY',
+      e: "AQAB",
+      kty: "RSA",
+      n: "n",
+      use: 'sig',
       x5c: [
         `
 MIIEnjCCAoYCCQCMoDmTYrlYFTANBgkqhkiG9w0BAQsFADARMQ8wDQYDVQQDDAZ1
