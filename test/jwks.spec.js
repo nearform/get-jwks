@@ -190,7 +190,7 @@ t.test('calling the clear cache function resets the cache and clears keys', asyn
   t.end()
 })
 
-t.test('If an issuer provides a domain where there is a missing trailing slash, it should be handled', async t => {
+t.test('if an issuer provides a domain where there is a missing trailing slash, it should be handled', async t => {
   t.plan(1)
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const domainWithMissingTrailingSlash = 'https://localhost'
@@ -205,7 +205,6 @@ const jwks = {
     {
       alg: 'RS512',
       kid: 'KEY',
-      // x5c: ['UNUSED'], // AWS cognito
       e: 'AQAB',
       kty: 'RSA',
       n: 'n',
