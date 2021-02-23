@@ -206,17 +206,17 @@ const jwks = {
       alg: 'RS512',
       kid: 'KEY',
       // x5c: ['UNUSED'], // AWS cognito
-      e: "AQAB",
-      kty: "RSA",
-      n: "n",
+      e: 'AQAB',
+      kty: 'RSA',
+      n: 'n',
       use: 'sig'
     },
     {
       alg: 'RS256',
       kid: 'KEY',
-      e: "AQAB",
-      kty: "RSA",
-      n: "n",
+      e: 'AQAB',
+      kty: 'RSA',
+      n: 'n',
       use: 'sig',
       x5c: [
         `

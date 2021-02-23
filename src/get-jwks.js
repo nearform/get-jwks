@@ -25,10 +25,10 @@ function buildGetJwks (cacheProps = {}) {
     }
 
     // ensure there's a trailing slash from the domain
-    const issuerDomain = domain.endsWith('/') ? domain : `${ domain }/`
+    const issuerDomain = domain.endsWith('/') ? domain : `${domain}/`
 
     // Hit the well-known URL in order to get the key
-    const response = await fetch(`${ issuerDomain }.well-known/jwks.json`, { timeout: 5000 })
+    const response = await fetch(`${issuerDomain}.well-known/jwks.json`, { timeout: 5000 })
     const body = await response.json()
 
     if (!response.ok) {
