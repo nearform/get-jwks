@@ -21,8 +21,7 @@ t.test('should return an error if the request fails', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(500, { msg: 'no good' })
   try {
     const getJwks = buildGetJwks()
-    const localKey = jwks.keys[0]
-    await getJwks.getSecret({ domain: 'https://localhost/', alg: localKey.alg, kid: localKey.kid })
+    await getJwks.getSecret({ domain: 'https://localhost/', alg: 'ALG', kid: 'SOME_KEY' })
   } catch (e) {
     t.equal(e.message, 'Internal Server Error')
     t.same(e.body, { msg: 'no good' })
@@ -33,7 +32,7 @@ t.test('should return an error if alg and kid do not match', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   try {
     const getJwks = buildGetJwks()
-    await getJwks.getSecret({ domain: 'https://localhost/', alg: 'ABC', kid: 'some other KEY' })
+    await getJwks.getSecret({ domain: 'https://localhost/', alg: 'ALG', kid: 'SOME_KEY' })
   } catch (e) {
     t.equal(e.message, 'No matching key found in the set.')
   }
@@ -116,7 +115,7 @@ t.test('if the cached key has a value it should return that value', async t => {
 t.test('it will throw an error if no keys are found in the JWKS', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwksNoKeys)
   const domain = 'https://localhost/'
-  const localKey = jwks.keys[0]
+  const localKey = jwks.keys[1]
   const alg = localKey.alg
   const kid = localKey.kid
 
