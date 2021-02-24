@@ -2,6 +2,7 @@
 
 const fetch = require('node-fetch')
 const lru = require('tiny-lru')
+const jwkToPem = require('jwk-to-pem')
 
 const MISSING_KEY_ERROR = 'No matching key found in the set.'
 const NO_KEYS_ERROR = 'No keys found in the set.'
@@ -23,8 +24,11 @@ function buildGetJwks (cacheProps = {}) {
       throw new Error(MISSING_KEY_ERROR)
     }
 
+    // ensure there's a trailing slash from the domain
+    const issuerDomain = domain.endsWith('/') ? domain : `${domain}/`
+
     // Hit the well-known URL in order to get the key
-    const response = await fetch(`${domain}.well-known/jwks.json`, { timeout: 5000 })
+    const response = await fetch(`${issuerDomain}.well-known/jwks.json`, { timeout: 5000 })
     const body = await response.json()
 
     if (!response.ok) {
@@ -48,10 +52,7 @@ function buildGetJwks (cacheProps = {}) {
       throw new Error(MISSING_KEY_ERROR)
     }
 
-    // should we be using https://github.com/Brightspace/node-jwk-to-pem ??
-
-    // certToPEM extracted from https://github.com/auth0/node-jwks-rsa/blob/master/src/utils.js
-    const secret = `-----BEGIN CERTIFICATE-----\n${key.x5c[0]}\n-----END CERTIFICATE-----\n`
+    const secret = jwkToPem(key)
 
     // Save the key in the cache
     cache.set(cacheKey, secret)

@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/nearform/get-jwks#readme",
   "dependencies": {
+    "jwk-to-pem": "^2.0.4",
     "node-fetch": "^2.6.1",
     "tiny-lru": "^7.0.6"
   },

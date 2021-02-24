@@ -2,6 +2,7 @@
 
 const nock = require('nock')
 const t = require('tap')
+const jwkToPem = require('jwk-to-pem')
 
 const buildGetJwks = require('../src/get-jwks')
 
@@ -16,44 +17,38 @@ t.afterEach((done, t) => {
   done()
 })
 
-t.test('should fetch the remove jwks and return an error if the request fails', async t => {
-  t.plan(2)
+t.test('should return an error if the request fails', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(500, { msg: 'no good' })
   try {
     const getJwks = buildGetJwks()
-    await getJwks.getSecret({ domain: 'https://localhost/', alg: 'RS512', kid: 'KEY' })
+    await getJwks.getSecret({ domain: 'https://localhost/', alg: 'ALG', kid: 'SOME_KEY' })
   } catch (e) {
     t.equal(e.message, 'Internal Server Error')
     t.same(e.body, { msg: 'no good' })
   }
-  t.end()
 })
 
-t.test('should fetch the remove jwks and return an error if alg and kid do not match', async t => {
-  t.plan(1)
+t.test('should return an error if alg and kid do not match', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   try {
     const getJwks = buildGetJwks()
-    await getJwks.getSecret({ domain: 'https://localhost/', alg: 'ABC', kid: 'some other KEY' })
+    await getJwks.getSecret({ domain: 'https://localhost/', alg: 'ALG', kid: 'SOME_KEY' })
   } catch (e) {
     t.equal(e.message, 'No matching key found in the set.')
   }
-  t.end()
 })
 
-t.test('should fetch the remove jwks and return an the secrete if alg and kid match', async t => {
-  t.plan(2)
+t.test('should return a secret if alg and kid match', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
-  const secret = await getJwks.getSecret({ domain: 'https://localhost/', alg: 'RS512', kid: 'KEY' })
+  const localKey = jwks.keys[0]
+  const secret = await getJwks.getSecret({ domain: 'https://localhost/', alg: localKey.alg, kid: localKey.kid })
+  const pem = jwkToPem(jwks.keys[0])
   t.ok(secret)
-  t.includes(secret, jwks.keys[0].x5c[0])
-  t.end()
+  t.equal(secret, pem)
 })
 
 t.test('if the cached key is null it should return an error', async t => {
-  t.plan(1)
-
   const getJwks = buildGetJwks()
   const domain = 'https://localhost/'
   const alg = 'ABC'
@@ -66,13 +61,10 @@ t.test('if the cached key is null it should return an error', async t => {
   } catch (e) {
     t.equal(e.message, 'No matching key found in the set.')
   }
-  t.end()
 })
 
 t.test('if alg and kid do not match any jwks, the cache key should be set to null', async t => {
-  t.plan(2)
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
-
   const getJwks = buildGetJwks()
   const domain = 'https://localhost/'
   const alg = 'ALG'
@@ -86,32 +78,31 @@ t.test('if alg and kid do not match any jwks, the cache key should be set to nul
   }
 
   t.equal(cache.get(`${alg}:${kid}:${domain}`), null)
-  t.end()
 })
 
 t.test('if the cached key is undefined it should fetch the jwks and set the key to the secret', async t => {
-  t.plan(3)
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
   const domain = 'https://localhost/'
-  const alg = 'RS512'
-  const kid = 'KEY'
+  const localKey = jwks.keys[1]
+  const alg = localKey.alg
+  const kid = localKey.kid
   const cache = getJwks.cache
 
   const secret = await getJwks.getSecret({ domain, alg, kid })
+  const pem = jwkToPem(localKey)
   t.ok(secret)
-  t.includes(secret, jwks.keys[0].x5c[0])
+  t.equal(secret, pem)
   t.equal(cache.get(`${alg}:${kid}:${domain}`), secret)
-  t.end()
 })
 
 t.test('if the cached key has a value it should return that value', async t => {
-  t.plan(3)
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
   const domain = 'https://localhost/'
-  const alg = 'RS512'
-  const kid = 'KEY'
+  const localKey = jwks.keys[0]
+  const alg = localKey.alg
+  const kid = localKey.kid
   const cache = getJwks.cache
   cache.set(`${alg}:${kid}:${domain}`, 'super secret')
 
@@ -119,15 +110,14 @@ t.test('if the cached key has a value it should return that value', async t => {
   t.ok(secret)
   t.includes(secret, 'super secret')
   t.equal(cache.get(`${alg}:${kid}:${domain}`), 'super secret')
-  t.end()
 })
 
-t.test('it will throw an error id no keys are found in the JWKS', async t => {
-  t.plan(1)
+t.test('it will throw an error if no keys are found in the JWKS', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwksNoKeys)
   const domain = 'https://localhost/'
-  const alg = 'RS512'
-  const kid = 'KEY'
+  const localKey = jwks.keys[1]
+  const alg = localKey.alg
+  const kid = localKey.kid
 
   try {
     const getJwks = buildGetJwks()
@@ -135,16 +125,14 @@ t.test('it will throw an error id no keys are found in the JWKS', async t => {
   } catch (e) {
     t.equal(e.message, 'No keys found in the set.')
   }
-
-  t.end()
 })
 
-t.test('it will throw an error id no keys are found in the JWKS', async t => {
-  t.plan(1)
+t.test('it will throw an error if no keys are found in the JWKS', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwksEmptyKeys)
   const domain = 'https://localhost/'
-  const alg = 'RS512'
-  const kid = 'KEY'
+  const localKey = jwks.keys[0]
+  const alg = localKey.alg
+  const kid = localKey.kid
 
   try {
     const getJwks = buildGetJwks()
@@ -152,12 +140,9 @@ t.test('it will throw an error id no keys are found in the JWKS', async t => {
   } catch (e) {
     t.equal(e.message, 'No keys found in the set.')
   }
-
-  t.end()
 })
 
 t.test('if initialized without any cache settings it should use default values', async t => {
-  t.plan(3)
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
 
   const getJwks = buildGetJwks()
@@ -166,17 +151,16 @@ t.test('if initialized without any cache settings it should use default values',
   t.ok(getJwks.cache)
   t.equal(cache.max, 100)
   t.equal(cache.ttl, 60000)
-  t.end()
 })
 
 t.test('calling the clear cache function resets the cache and clears keys', async t => {
-  t.plan(3)
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
 
   const getJwks = buildGetJwks()
   const domain = 'https://localhost/'
-  const alg = 'RS512'
-  const kid = 'KEY'
+  const localKey = jwks.keys[0]
+  const alg = localKey.alg
+  const kid = localKey.kid
   const cache = getJwks.cache
   const secret = await getJwks.getSecret({ domain, alg, kid })
 
@@ -184,19 +168,36 @@ t.test('calling the clear cache function resets the cache and clears keys', asyn
   t.equal(cache.get(`${alg}:${kid}:${domain}`), secret)
   await getJwks.clearCache()
   t.equal(cache.get(`${alg}:${kid}:${domain}`), undefined)
-  t.end()
+})
+
+t.test('if an issuer provides a domain with a missing trailing slash, it should be handled', async t => {
+  nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
+  const domainWithMissingTrailingSlash = 'https://localhost'
+  const getJwks = buildGetJwks()
+  const localKey = jwks.keys[0]
+  const alg = localKey.alg
+  const kid = localKey.kid
+  const secret = await getJwks.getSecret({ domain: domainWithMissingTrailingSlash, alg, kid })
+  t.ok(secret)
 })
 
 const jwks = {
   keys: [
     {
       alg: 'RS512',
-      kid: 'KEY',
-      x5c: ['UNUSED']
+      kid: 'KEY_0',
+      e: 'AQAB',
+      kty: 'RSA',
+      n: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImp0aSI6ImZmMTBmMTg1LWFiODEtNDhjYS1hZmI1LTdkY2FhMzNmYzgzNSIsImlhdCI6MTYxNDEwMzkxNiwiZXhwIjoxNjE0MTA3NTE2fQ.mLx1TZaHDhcymZFmLM7pfBhowY7CEgjuxr54LPXpGXc',
+      use: 'sig'
     },
     {
       alg: 'RS256',
       kid: 'KEY',
+      e: 'AQAB',
+      kty: 'RSA',
+      n: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvZSBCbG9nZ3MiLCJhZG1pbiI6dHJ1ZSwianRpIjoiZmYxMGYxODUtYWI4MS00OGNhLWFmYjUtN2RjYWEzM2ZjODM1IiwiaWF0IjoxNjE0MTAzOTE2LCJleHAiOjE2MTQxMDc1NDl9.4PQiX1jCDiTbRnwWusQHW2UNHxpGgpcRaUxSt4K6C8I',
+      use: 'sig',
       x5c: [
         `
 MIIEnjCCAoYCCQCMoDmTYrlYFTANBgkqhkiG9w0BAQsFADARMQ8wDQYDVQQDDAZ1
