@@ -48,7 +48,7 @@ const publicKey = await getJwks.getPublicKey({
 
 ```
 
-Calling the asynchronous function `getPublicKey` will run the `getJwk` function to retrieve a matching key, then convert it to a PEM private key.  It requires the same arguments as `getJwk`.
+Calling the asynchronous function `getPublicKey` will run the `getJwk` function to retrieve a matching key, then convert it to a PEM public key.  It requires the same arguments as `getJwk`.
 
 ### clearCache
 
