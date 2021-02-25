@@ -35,16 +35,12 @@ t.test('if there is already a key in cache, it should not make a http request', 
 
   getJwks.cache.set(`${alg}:${kid}:${domain}`, localKey)
 
-  try {
-    const publicKey = await getJwks.getPublicKey({ domain, alg, kid })
-    const jwk = await getJwks.getJwk({ domain, alg, kid })
-    t.ok(publicKey)
-    t.ok(jwk)
-    t.equal(publicKey, jwkToPem(jwk))
-    t.deepEqual(jwk, localKey)
-  } catch (e) {
-    t.throws(function() { throw new Error('An error was thrown') }, {})
-  }
+  const publicKey = await getJwks.getPublicKey({ domain, alg, kid })
+  const jwk = await getJwks.getJwk({ domain, alg, kid })
+  t.ok(publicKey)
+  t.ok(jwk)
+  t.equal(publicKey, jwkToPem(jwk))
+  t.deepEqual(jwk, localKey)
 })
 
 t.test('if initialized without any cache settings it should use default values', async t => {

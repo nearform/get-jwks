@@ -25,7 +25,7 @@ t.test('getJwk should return an error if the request fails', async t => {
     t.equal(e.message, 'Internal Server Error')
     t.same(e.body, { msg: 'no good' })
   }
-  t.throws(function() { throw new Error('An error was thrown') }, {})
+  t.throws(() => { throw new Error('An error was thrown') }, {})
 })
 
 t.test('getJwk should return an error if alg and kid do not match', async t => {
@@ -36,7 +36,7 @@ t.test('getJwk should return an error if alg and kid do not match', async t => {
   } catch (e) {
     t.equal(e.message, 'No matching JWK found in the set.')
   }
-  t.throws(function() { throw new Error('An error was thrown') }, {})
+  t.throws(() => { throw new Error('An error was thrown') }, {})
 })
 
 t.test('getJwk should return a key if alg and kid match', async t => {
@@ -60,7 +60,6 @@ t.test('if alg and kid do not match any jwks, the cached jwk should be set to nu
     await getJwks.getJwk({ domain, alg, kid })
   } catch (e) {
     t.equal(e.message, 'No matching JWK found in the set.')
-    t.throws(function() { throw new Error('An error was thrown') }, {})
   }
 
   t.deepEqual(cache.get(`${alg}:${kid}:${domain}`), null)
@@ -93,7 +92,7 @@ t.test('it will throw an error if no JWKS are found in the response', async t =>
   } catch (e) {
     t.equal(e.message, 'No JWKS found in the response.')
   }
-  t.throws(function() { throw new Error('An error was thrown') }, {})
+  t.throws(() => { throw new Error('An error was thrown') }, {})
 })
 
 t.test('it will throw an error if no JWKS are found in the response', async t => {
@@ -109,7 +108,7 @@ t.test('it will throw an error if no JWKS are found in the response', async t =>
   } catch (e) {
     t.equal(e.message, 'No JWKS found in the response.')
   }
-  t.throws(function() { throw new Error('An error was thrown') }, {})
+  t.throws(() => { throw new Error('An error was thrown') }, {})
 })
 
 t.test('if an issuer provides a domain with a missing trailing slash, it should be handled', async t => {
@@ -129,14 +128,9 @@ t.test('if there is already a JWK in cache, it should not make an http request',
   const localKey = jwks.keys[0]
   const alg = localKey.alg
   const kid = localKey.kid
-
   getJwks.cache.set(`${alg}:${kid}:${domain}`, localKey)
-  try {
-    const secret = await getJwks.getJwk({ domain, alg, kid })
-    t.ok(secret)
-  } catch (e) {
-    t.throws(function() { throw new Error('An error was thrown') }, {})
-  }
+  const secret = await getJwks.getJwk({ domain, alg, kid })
+  t.ok(secret)
 })
 
 const jwks = {
