@@ -26,6 +26,7 @@ t.test('getPublicKey should return an error if the request fails', async t => {
     t.equal(e.message, 'Internal Server Error')
     t.same(e.body, { msg: 'no good' })
   }
+  t.throws(function() { throw new Error('An error was thrown') }, {})
 })
 
 t.test('getPublicKey should return an error if alg and kid do not match', async t => {
@@ -36,6 +37,7 @@ t.test('getPublicKey should return an error if alg and kid do not match', async 
   } catch (e) {
     t.equal(e.message, 'No matching JWK found in the set.')
   }
+  t.throws(function() { throw new Error('An error was thrown') }, {})
 })
 
 t.test('getPublicKey should return a publicKey if alg and kid match', async t => {
@@ -61,6 +63,7 @@ t.test('if alg and kid do not match any JWKS it should throw an error', async t 
   } catch (e) {
     t.equal(e.message, 'No matching JWK found in the set.')
   }
+  t.throws(function() { throw new Error('An error was thrown') }, {})
 })
 
 t.test('if the cached JWK is undefined it should fetch the JWKS and set the matching JWK in the cache', async t => {
@@ -92,6 +95,8 @@ t.test('it will throw an error if no JWKS are found in the response', async t =>
   } catch (e) {
     t.equal(e.message, 'No JWKS found in the response.')
   }
+
+  t.throws(function() { throw new Error('An error was thrown') }, {})
 })
 
 t.test('it will throw an error if the keys are empty in the response', async t => {
@@ -107,6 +112,7 @@ t.test('it will throw an error if the keys are empty in the response', async t =
   } catch (e) {
     t.equal(e.message, 'No JWKS found in the response.')
   }
+  t.throws(function() { throw new Error('An error was thrown') }, {})
 })
 
 t.test('if an issuer provides a domain with a missing trailing slash, it should be handled', async t => {

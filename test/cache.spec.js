@@ -43,7 +43,7 @@ t.test('if there is already a key in cache, it should not make a http request', 
     t.equal(publicKey, jwkToPem(jwk))
     t.deepEqual(jwk, localKey)
   } catch (e) {
-    t.throws(e)
+    t.throws(function() { throw new Error('An error was thrown') }, {})
   }
 })
 
