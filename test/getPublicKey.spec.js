@@ -19,25 +19,24 @@ t.afterEach((done) => {
 
 t.test('getPublicKey should return an error if the request fails', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(500, { msg: 'no good' })
-  try {
-    const getJwks = buildGetJwks()
-    await getJwks.getPublicKey({ domain: 'https://localhost/', alg: 'ALG', kid: 'SOME_KEY' })
-  } catch (e) {
-    t.equal(e.message, 'Internal Server Error')
-    t.same(e.body, { msg: 'no good' })
-  }
-  t.throws(() => { throw new Error('An error was thrown') }, {})
+  const expectedError = new Error('Internal Server Error')
+  expectedError.body = { msg: 'no good' }
+  const getJwks = buildGetJwks()
+  t.rejects(
+    getJwks.getPublicKey({ domain: 'https://localhost/', alg: 'ALG', kid: 'SOME_KEY' }),
+    expectedError
+  )
 })
 
 t.test('getPublicKey should return an error if alg and kid do not match', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
-  try {
-    const getJwks = buildGetJwks()
-    await getJwks.getPublicKey({ domain: 'https://localhost/', alg: 'ALG', kid: 'SOME_KEY' })
-  } catch (e) {
-    t.equal(e.message, 'No matching JWK found in the set.')
-  }
-  t.throws(() => { throw new Error('An error was thrown') }, {})
+
+  const expectedError = new Error('No matching JWK found in the set.')
+  const getJwks = buildGetJwks()
+  t.rejects(
+    getJwks.getPublicKey({ domain: 'https://localhost/', alg: 'ALG', kid: 'SOME_KEY' }),
+    expectedError
+  )
 })
 
 t.test('getPublicKey should return a publicKey if alg and kid match', async t => {
@@ -58,12 +57,11 @@ t.test('if alg and kid do not match any JWKS it should throw an error', async t 
   const kid = 'KEY'
   const cache = getJwks.cache
 
-  try {
-    await getJwks.getPublicKey({ domain, alg, kid, cache })
-  } catch (e) {
-    t.equal(e.message, 'No matching JWK found in the set.')
-  }
-  t.throws(() => { throw new Error('An error was thrown') }, {})
+  const expectedError = new Error('No matching JWK found in the set.')
+  t.rejects(
+    getJwks.getPublicKey({ domain, alg, kid, cache }),
+    expectedError
+  )
 })
 
 t.test('if the cached JWK is undefined it should fetch the JWKS and set the matching JWK in the cache', async t => {
@@ -88,15 +86,12 @@ t.test('it will throw an error if no JWKS are found in the response', async t =>
   const localKey = jwks.keys[1]
   const alg = localKey.alg
   const kid = localKey.kid
-
-  try {
-    const getJwks = buildGetJwks()
-    await getJwks.getPublicKey({ domain, alg, kid })
-  } catch (e) {
-    t.equal(e.message, 'No JWKS found in the response.')
-  }
-
-  t.throws(() => { throw new Error('An error was thrown') }, {})
+  const getJwks = buildGetJwks()
+  const expectedError = new Error('No JWKS found in the response.')
+  t.rejects(
+    getJwks.getPublicKey({ domain, alg, kid }),
+    expectedError
+  )
 })
 
 t.test('it will throw an error if the keys are empty in the response', async t => {
@@ -105,14 +100,12 @@ t.test('it will throw an error if the keys are empty in the response', async t =
   const localKey = jwks.keys[0]
   const alg = localKey.alg
   const kid = localKey.kid
-
-  try {
-    const getJwks = buildGetJwks()
-    await getJwks.getPublicKey({ domain, alg, kid })
-  } catch (e) {
-    t.equal(e.message, 'No JWKS found in the response.')
-  }
-  t.throws(() => { throw new Error('An error was thrown') }, {})
+  const getJwks = buildGetJwks()
+  const expectedError = new Error('No JWKS found in the response.')
+  t.rejects(
+    getJwks.getPublicKey({ domain, alg, kid }),
+    expectedError
+  )
 })
 
 t.test('if an issuer provides a domain with a missing trailing slash, it should be handled', async t => {
