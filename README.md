@@ -14,21 +14,21 @@ npm install get-jwks
 
 ## Usage
 
-### getJWK
+### getJwk
 
 ```javascript
 const buildGetJwks = require('get-jwks')
 
 const getJwks = buildGetJwks()
 
-const key = await getJwks.getJWK({
+const key = await getJwks.getJwk({
   domain: 'https://exampe.com/',
   alg: 'token_alg',
   kid: 'token_kid'
 })
 
 ```
-Calling the asynchronous function `getJWK` will fetch the [JSON Web Key](https://tools.ietf.org/html/rfc7517), and verify if any of the public keys matches the `alg` and `kid` values of your JWT token.  It will cache the matching key so if called again it will not make another request to retrieve a JWKS.
+Calling the asynchronous function `getJwk` will fetch the [JSON Web Key](https://tools.ietf.org/html/rfc7517), and verify if any of the public keys matches the `alg` and `kid` values of your JWT token.  It will cache the matching key so if called again it will not make another request to retrieve a JWKS.
 - `domain`: A string containing the domain (ie: `https://www.example.com/`) from which the library should fetch the JWKS. `get-jwks` will add the JWKS location (`.well-known/jwks.json`) to form the final url (ie: `https://www.example.com/.well-known/jwks.json`).
 - `alg`: The alg header parameter represents the cryptographic algorithm used to secure the token. You will find it in your decoded JWT.
 - `kid`: The kid is a hint that indicates which key was used to secure the JSON web signature of the token. You will find it in your decoded JWT.
@@ -48,7 +48,7 @@ const publicKey = await getJwks.getPublicKey({
 
 ```
 
-Calling the asynchronous function `getPublicKey` will run the `getJWK` function to retrieve a matching key, then convert it to a PEM private key.  It requires the same arguments as `getJWK`.
+Calling the asynchronous function `getPublicKey` will run the `getJwk` function to retrieve a matching key, then convert it to a PEM private key.  It requires the same arguments as `getJwk`.
 
 ### clearCache
 
