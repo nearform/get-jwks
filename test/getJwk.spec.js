@@ -41,12 +41,12 @@ t.test('getJwk should return a key if alg and kid match', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
   const localKey = jwks.keys[0]
-  const key = await getJwks.getJwk({ domain: 'https://localhost/', alg: localKey.alg, kid: localKey.kid })
-  t.ok(key)
-  t.deepEqual(key, localKey)
+  const jwk = await getJwks.getJwk({ domain: 'https://localhost/', alg: localKey.alg, kid: localKey.kid })
+  t.ok(jwk)
+  t.deepEqual(jwk, localKey)
 })
 
-t.test('if alg and kid do not match any jwks, the cache key should be set to null', async t => {
+t.test('if alg and kid do not match any jwks, the cached jwk should be set to null', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
   const domain = 'https://localhost/'
@@ -63,7 +63,7 @@ t.test('if alg and kid do not match any jwks, the cache key should be set to nul
   t.deepEqual(cache.get(`${alg}:${kid}:${domain}`), null)
 })
 
-t.test('if the cached key is undefined it should fetch the jwks and set the key in the cache', async t => {
+t.test('if the cached JWK is undefined it should fetch the JWKS and set the matching JWK in the cache', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
   const domain = 'https://localhost/'
@@ -71,13 +71,13 @@ t.test('if the cached key is undefined it should fetch the jwks and set the key 
   const alg = localKey.alg
   const kid = localKey.kid
   const cache = getJwks.cache
-  const key = await getJwks.getJwk({ domain, alg, kid })
-  t.ok(key)
-  t.deepEqual(key, localKey)
+  const jwk = await getJwks.getJwk({ domain, alg, kid })
+  t.ok(jwk)
+  t.deepEqual(jwk, localKey)
   t.deepEqual(cache.get(`${alg}:${kid}:${domain}`), localKey)
 })
 
-t.test('it will throw an error if no keys are found in the response', async t => {
+t.test('it will throw an error if no JWKS are found in the response', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwksNoKeys)
   const domain = 'https://localhost/'
   const localKey = jwks.keys[1]
@@ -92,7 +92,7 @@ t.test('it will throw an error if no keys are found in the response', async t =>
   }
 })
 
-t.test('it will throw an error if no keys are found in the response', async t => {
+t.test('it will throw an error if no JWKS are found in the response', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwksEmptyKeys)
   const domain = 'https://localhost/'
   const localKey = jwks.keys[0]
@@ -118,7 +118,7 @@ t.test('if an issuer provides a domain with a missing trailing slash, it should 
   t.ok(key)
 })
 
-t.test('if there is already a key in cache, it should not make a http request', async t => {
+t.test('if there is already a JWK in cache, it should not make an http request', async t => {
   const getJwks = buildGetJwks()
   const domain = 'https://localhost/'
   const localKey = jwks.keys[0]

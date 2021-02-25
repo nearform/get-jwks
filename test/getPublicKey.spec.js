@@ -17,7 +17,7 @@ t.afterEach((done) => {
   done()
 })
 
-t.test('should return an error if the request fails', async t => {
+t.test('getPublicKey should return an error if the request fails', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(500, { msg: 'no good' })
   try {
     const getJwks = buildGetJwks()
@@ -28,7 +28,7 @@ t.test('should return an error if the request fails', async t => {
   }
 })
 
-t.test('should return an error if alg and kid do not match', async t => {
+t.test('getPublicKey should return an error if alg and kid do not match', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   try {
     const getJwks = buildGetJwks()
@@ -38,7 +38,7 @@ t.test('should return an error if alg and kid do not match', async t => {
   }
 })
 
-t.test('should return a publicKey if alg and kid match', async t => {
+t.test('getPublicKey should return a publicKey if alg and kid match', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
   const localKey = jwks.keys[0]
@@ -48,7 +48,7 @@ t.test('should return a publicKey if alg and kid match', async t => {
   t.equal(publicKey, pem)
 })
 
-t.test('if alg and kid do not match any jwks it should throw an error', async t => {
+t.test('if alg and kid do not match any JWKS it should throw an error', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
   const domain = 'https://localhost/'
@@ -63,7 +63,7 @@ t.test('if alg and kid do not match any jwks it should throw an error', async t 
   }
 })
 
-t.test('if the cached key is undefined it should fetch the jwks and set the key in the cache', async t => {
+t.test('if the cached JWK is undefined it should fetch the JWKS and set the matching JWK in the cache', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
   const domain = 'https://localhost/'
@@ -79,7 +79,7 @@ t.test('if the cached key is undefined it should fetch the jwks and set the key 
   t.deepEqual(cache.get(`${alg}:${kid}:${domain}`), localKey)
 })
 
-t.test('it will throw an error if no keys are found in the JWKS', async t => {
+t.test('it will throw an error if no JWKS are found in the response', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwksNoKeys)
   const domain = 'https://localhost/'
   const localKey = jwks.keys[1]
@@ -94,7 +94,7 @@ t.test('it will throw an error if no keys are found in the JWKS', async t => {
   }
 })
 
-t.test('it will throw an error if the keys are empty in the JWKS', async t => {
+t.test('it will throw an error if the keys are empty in the response', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwksEmptyKeys)
   const domain = 'https://localhost/'
   const localKey = jwks.keys[0]

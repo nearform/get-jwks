@@ -1,6 +1,7 @@
 'use strict'
 
 const t = require('tap')
+const jwkToPem = require('jwk-to-pem')
 
 const buildGetJwks = require('../src/get-jwks')
 
@@ -35,10 +36,12 @@ t.test('if there is already a key in cache, it should not make a http request', 
   getJwks.cache.set(`${alg}:${kid}:${domain}`, localKey)
 
   try {
-    const secret = await getJwks.getPublicKey({ domain, alg, kid })
-    const key = await getJwks.getPublicKey({ domain, alg, kid })
-    t.ok(secret)
-    t.ok(key)
+    const publicKey = await getJwks.getPublicKey({ domain, alg, kid })
+    const jwk = await getJwks.getJwk({ domain, alg, kid })
+    t.ok(publicKey)
+    t.ok(jwk)
+    t.equal(publicKey, jwkToPem(jwk))
+    t.deepEqual(jwk, localKey)
   } catch (e) {
     t.throws(e)
   }
@@ -52,10 +55,10 @@ t.test('if initialized without any cache settings it should use default values',
   const alg = localKey.alg
   const kid = localKey.kid
   cache.set(`${alg}:${kid}:${domain}`, localKey)
-  const secret = await getJwks.getPublicKey({ domain, alg, kid })
-  const key = await getJwks.getJwk({ domain, alg, kid })
-  t.ok(secret)
-  t.ok(key)
+  const publicKey = await getJwks.getPublicKey({ domain, alg, kid })
+  const jwk = await getJwks.getJwk({ domain, alg, kid })
+  t.ok(publicKey)
+  t.ok(jwk)
   t.ok(getJwks.cache)
   t.equal(cache.max, 100)
   t.equal(cache.ttl, 60000)
@@ -69,11 +72,11 @@ t.test('calling the clear cache function resets the cache and clears keys', asyn
   const kid = localKey.kid
   const cache = getJwks.cache
   cache.set(`${alg}:${kid}:${domain}`, localKey)
-  const secret = await getJwks.getPublicKey({ domain, alg, kid })
+  const publicKey = await getJwks.getPublicKey({ domain, alg, kid })
   const key = await getJwks.getJwk({ domain, alg, kid })
-  t.ok(secret)
+  t.ok(publicKey)
   t.ok(key)
   t.equal(cache.get(`${alg}:${kid}:${domain}`), localKey)
-  await getJwks.clearCache()
+  getJwks.clearCache()
   t.equal(cache.get(`${alg}:${kid}:${domain}`), undefined)
 })
