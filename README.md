@@ -21,7 +21,7 @@ const buildGetJwks = require('get-jwks')
 
 const getJwks = buildGetJwks()
 
-const key = await getJwks.getJwk({
+const jwk = await getJwks.getJwk({
   domain: 'https://exampe.com/',
   alg: 'token_alg',
   kid: 'token_kid'
