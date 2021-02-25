@@ -6,12 +6,12 @@ const jwkToPem = require('jwk-to-pem')
 
 const buildGetJwks = require('../src/get-jwks')
 
-t.beforeEach((done, t) => {
+t.beforeEach((done) => {
   nock.disableNetConnect()
   done()
 })
 
-t.afterEach((done, t) => {
+t.afterEach((done) => {
   nock.cleanAll()
   nock.enableNetConnect()
   done()
