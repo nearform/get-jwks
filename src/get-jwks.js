@@ -15,19 +15,29 @@ function buildGetJwks (cacheProps = {}) {
   async function getSecret (signatures) {
     const { domain, alg, kid } = signatures
     const cacheKey = `${alg}:${kid}:${domain}`
-    const cachedSecret = cache.get(cacheKey)
+    const cachedJwsk = cache.get(cacheKey)
 
-    if (cachedSecret) {
-      return cachedSecret
-    } else if (cachedSecret === null) {
-      // null is returned when a previous attempt resulted in the key missing in the JWKs - Do not attemp to fetch again
-      throw new Error(MISSING_KEY_ERROR)
+    if (cachedJwsk) {
+      const secret = jwkToPem(cachedJwsk)
+      return secret
     }
 
-    // ensure there's a trailing slash from the domain
-    const issuerDomain = domain.endsWith('/') ? domain : `${domain}/`
+    const key = await getKey(signatures)
+    const secret = jwkToPem(key)
+    cache.set(cacheKey, secret)
+    return secret
+  }
 
-    // Hit the well-known URL in order to get the key
+  async function getKey (signatures) {
+    const { domain, alg, kid } = signatures
+    const cacheKey = `${alg}:${kid}:${domain}`
+    const cachedJwsk = cache.get(cacheKey)
+
+    if (cachedJwsk) {
+      return cachedJwsk
+    }
+
+    const issuerDomain = domain.endsWith('/') ? domain : `${domain}/`
     const response = await fetch(`${issuerDomain}.well-known/jwks.json`, { timeout: 5000 })
     const body = await response.json()
 
@@ -35,7 +45,6 @@ function buildGetJwks (cacheProps = {}) {
       const error = new Error(response.statusText)
       error.response = response
       error.body = body
-
       throw error
     }
 
@@ -43,24 +52,19 @@ function buildGetJwks (cacheProps = {}) {
       throw new Error(NO_KEYS_ERROR)
     }
 
-    // Find the key with ID and algorithm matching the JWT token header
     const key = body.keys.find(k => k.alg === alg && k.kid === kid)
 
     if (!key) {
-      // Mark the key as missing
-      cache.set(cacheKey, null)
       throw new Error(MISSING_KEY_ERROR)
     }
 
-    const secret = jwkToPem(key)
-
-    // Save the key in the cache
-    cache.set(cacheKey, secret)
-    return secret
+    cache.set(cacheKey, key)
+    return key
   }
 
   return {
     getSecret,
+    getKey,
     clearCache: () => cache.clear(),
     cache
   }
