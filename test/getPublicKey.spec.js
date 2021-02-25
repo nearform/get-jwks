@@ -21,7 +21,7 @@ t.test('should return an error if the request fails', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(500, { msg: 'no good' })
   try {
     const getJwks = buildGetJwks()
-    await getJwks.getSecret({ domain: 'https://localhost/', alg: 'ALG', kid: 'SOME_KEY' })
+    await getJwks.getPublicKey({ domain: 'https://localhost/', alg: 'ALG', kid: 'SOME_KEY' })
   } catch (e) {
     t.equal(e.message, 'Internal Server Error')
     t.same(e.body, { msg: 'no good' })
@@ -32,20 +32,20 @@ t.test('should return an error if alg and kid do not match', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   try {
     const getJwks = buildGetJwks()
-    await getJwks.getSecret({ domain: 'https://localhost/', alg: 'ALG', kid: 'SOME_KEY' })
+    await getJwks.getPublicKey({ domain: 'https://localhost/', alg: 'ALG', kid: 'SOME_KEY' })
   } catch (e) {
-    t.equal(e.message, 'No matching key found in the set.')
+    t.equal(e.message, 'No matching JWK found in the set.')
   }
 })
 
-t.test('should return a secret if alg and kid match', async t => {
+t.test('should return a publicKey if alg and kid match', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
   const localKey = jwks.keys[0]
-  const secret = await getJwks.getSecret({ domain: 'https://localhost/', alg: localKey.alg, kid: localKey.kid })
+  const publicKey = await getJwks.getPublicKey({ domain: 'https://localhost/', alg: localKey.alg, kid: localKey.kid })
   const pem = jwkToPem(jwks.keys[0])
-  t.ok(secret)
-  t.equal(secret, pem)
+  t.ok(publicKey)
+  t.equal(publicKey, pem)
 })
 
 t.test('if alg and kid do not match any jwks it should throw an error', async t => {
@@ -57,9 +57,9 @@ t.test('if alg and kid do not match any jwks it should throw an error', async t 
   const cache = getJwks.cache
 
   try {
-    await getJwks.getSecret({ domain, alg, kid, cache })
+    await getJwks.getPublicKey({ domain, alg, kid, cache })
   } catch (e) {
-    t.equal(e.message, 'No matching key found in the set.')
+    t.equal(e.message, 'No matching JWK found in the set.')
   }
 })
 
@@ -71,12 +71,12 @@ t.test('if the cached key is undefined it should fetch the jwks and set the key 
   const alg = localKey.alg
   const kid = localKey.kid
   const cache = getJwks.cache
-
-  const secret = await getJwks.getSecret({ domain, alg, kid })
+  getJwks.clearCache()
+  const publicKey = await getJwks.getPublicKey({ domain, alg, kid })
   const pem = jwkToPem(localKey)
-  t.ok(secret)
-  t.equal(secret, pem)
-  t.equal(cache.get(`${alg}:${kid}:${domain}`), secret)
+  t.ok(publicKey)
+  t.equal(publicKey, pem)
+  t.deepEqual(cache.get(`${alg}:${kid}:${domain}`), localKey)
 })
 
 t.test('it will throw an error if no keys are found in the JWKS', async t => {
@@ -88,9 +88,9 @@ t.test('it will throw an error if no keys are found in the JWKS', async t => {
 
   try {
     const getJwks = buildGetJwks()
-    await getJwks.getSecret({ domain, alg, kid })
+    await getJwks.getPublicKey({ domain, alg, kid })
   } catch (e) {
-    t.equal(e.message, 'No keys found in the set.')
+    t.equal(e.message, 'No JWKS found in the set.')
   }
 })
 
@@ -103,9 +103,9 @@ t.test('it will throw an error if the keys are empty in the JWKS', async t => {
 
   try {
     const getJwks = buildGetJwks()
-    await getJwks.getSecret({ domain, alg, kid })
+    await getJwks.getPublicKey({ domain, alg, kid })
   } catch (e) {
-    t.equal(e.message, 'No keys found in the set.')
+    t.equal(e.message, 'No JWKS found in the set.')
   }
 })
 
@@ -116,8 +116,8 @@ t.test('if an issuer provides a domain with a missing trailing slash, it should 
   const localKey = jwks.keys[0]
   const alg = localKey.alg
   const kid = localKey.kid
-  const secret = await getJwks.getSecret({ domain: domainWithMissingTrailingSlash, alg, kid })
-  t.ok(secret)
+  const publicKey = await getJwks.getPublicKey({ domain: domainWithMissingTrailingSlash, alg, kid })
+  t.ok(publicKey)
 })
 
 const jwks = {

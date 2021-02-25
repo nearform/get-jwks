@@ -35,8 +35,8 @@ t.test('if there is already a key in cache, it should not make a http request', 
   getJwks.cache.set(`${alg}:${kid}:${domain}`, localKey)
 
   try {
-    const secret = await getJwks.getSecret({ domain, alg, kid })
-    const key = await getJwks.getSecret({ domain, alg, kid })
+    const secret = await getJwks.getPublicKey({ domain, alg, kid })
+    const key = await getJwks.getPublicKey({ domain, alg, kid })
     t.ok(secret)
     t.ok(key)
   } catch (e) {
@@ -52,8 +52,8 @@ t.test('if initialized without any cache settings it should use default values',
   const alg = localKey.alg
   const kid = localKey.kid
   cache.set(`${alg}:${kid}:${domain}`, localKey)
-  const secret = await getJwks.getSecret({ domain, alg, kid })
-  const key = await getJwks.getKey({ domain, alg, kid })
+  const secret = await getJwks.getPublicKey({ domain, alg, kid })
+  const key = await getJwks.getJwk({ domain, alg, kid })
   t.ok(secret)
   t.ok(key)
   t.ok(getJwks.cache)
@@ -69,8 +69,8 @@ t.test('calling the clear cache function resets the cache and clears keys', asyn
   const kid = localKey.kid
   const cache = getJwks.cache
   cache.set(`${alg}:${kid}:${domain}`, localKey)
-  const secret = await getJwks.getSecret({ domain, alg, kid })
-  const key = await getJwks.getKey({ domain, alg, kid })
+  const secret = await getJwks.getPublicKey({ domain, alg, kid })
+  const key = await getJwks.getJwk({ domain, alg, kid })
   t.ok(secret)
   t.ok(key)
   t.equal(cache.get(`${alg}:${kid}:${domain}`), localKey)

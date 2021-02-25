@@ -4,37 +4,36 @@ const fetch = require('node-fetch')
 const lru = require('tiny-lru')
 const jwkToPem = require('jwk-to-pem')
 
-const MISSING_KEY_ERROR = 'No matching key found in the set.'
-const NO_KEYS_ERROR = 'No keys found in the set.'
+const MISSING_JWK_ERROR = 'No matching JWK found in the set.'
+const NO_JWKS_ERROR = 'No JWKS found in the set.'
 
 function buildGetJwks (cacheProps = {}) {
   const max = cacheProps.max || 100
   const ttl = cacheProps.ttl || 60 * 1000
   const cache = lru(max, ttl)
 
-  async function getSecret (signatures) {
+  async function getPublicKey (signatures) {
     const { domain, alg, kid } = signatures
     const cacheKey = `${alg}:${kid}:${domain}`
-    const cachedJwsk = cache.get(cacheKey)
+    const cachedJwk = cache.get(cacheKey)
 
-    if (cachedJwsk) {
-      const secret = jwkToPem(cachedJwsk)
-      return secret
+    if (cachedJwk) {
+      const publicKey = jwkToPem(cachedJwk)
+      return publicKey
     }
 
-    const key = await getKey(signatures)
-    const secret = jwkToPem(key)
-    cache.set(cacheKey, secret)
-    return secret
+    const key = await getJwk(signatures)
+    const publicKey = jwkToPem(key)
+    return publicKey
   }
 
-  async function getKey (signatures) {
+  async function getJwk (signatures) {
     const { domain, alg, kid } = signatures
     const cacheKey = `${alg}:${kid}:${domain}`
-    const cachedJwsk = cache.get(cacheKey)
+    const cachedJwk = cache.get(cacheKey)
 
-    if (cachedJwsk) {
-      return cachedJwsk
+    if (cachedJwk) {
+      return cachedJwk
     }
 
     const issuerDomain = domain.endsWith('/') ? domain : `${domain}/`
@@ -49,22 +48,22 @@ function buildGetJwks (cacheProps = {}) {
     }
 
     if (!body.keys || body.keys.length === 0) {
-      throw new Error(NO_KEYS_ERROR)
+      throw new Error(NO_JWKS_ERROR)
     }
 
-    const key = body.keys.find(k => k.alg === alg && k.kid === kid)
+    const jwk = body.keys.find(k => k.alg === alg && k.kid === kid)
 
-    if (!key) {
-      throw new Error(MISSING_KEY_ERROR)
+    if (!jwk) {
+      throw new Error(MISSING_JWK_ERROR)
     }
 
-    cache.set(cacheKey, key)
-    return key
+    cache.set(cacheKey, jwk)
+    return jwk
   }
 
   return {
-    getSecret,
-    getKey,
+    getPublicKey,
+    getJwk,
     clearCache: () => cache.clear(),
     cache
   }

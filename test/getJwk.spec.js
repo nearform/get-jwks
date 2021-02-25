@@ -16,32 +16,32 @@ t.afterEach((done, t) => {
   done()
 })
 
-t.test('getKey should return an error if the request fails', async t => {
+t.test('getJwk should return an error if the request fails', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(500, { msg: 'no good' })
   try {
     const getJwks = buildGetJwks()
-    await getJwks.getKey({ domain: 'https://localhost/', alg: 'ALG', kid: 'SOME_KEY' })
+    await getJwks.getJwk({ domain: 'https://localhost/', alg: 'ALG', kid: 'SOME_KEY' })
   } catch (e) {
     t.equal(e.message, 'Internal Server Error')
     t.same(e.body, { msg: 'no good' })
   }
 })
 
-t.test('getKey should return an error if alg and kid do not match', async t => {
+t.test('getJwk should return an error if alg and kid do not match', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   try {
     const getJwks = buildGetJwks()
-    await getJwks.getKey({ domain: 'https://localhost/', alg: 'ALG', kid: 'SOME_KEY' })
+    await getJwks.getJwk({ domain: 'https://localhost/', alg: 'ALG', kid: 'SOME_KEY' })
   } catch (e) {
-    t.equal(e.message, 'No matching key found in the set.')
+    t.equal(e.message, 'No matching JWK found in the set.')
   }
 })
 
-t.test('getKey should return a key if alg and kid match', async t => {
+t.test('getJwk should return a key if alg and kid match', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
   const localKey = jwks.keys[0]
-  const key = await getJwks.getKey({ domain: 'https://localhost/', alg: localKey.alg, kid: localKey.kid })
+  const key = await getJwks.getJwk({ domain: 'https://localhost/', alg: localKey.alg, kid: localKey.kid })
   t.ok(key)
   t.deepEqual(key, localKey)
 })
@@ -55,9 +55,9 @@ t.test('if alg and kid do not match any jwks, the cache key should be set to nul
   const cache = getJwks.cache
 
   try {
-    await getJwks.getKey({ domain, alg, kid })
+    await getJwks.getJwk({ domain, alg, kid })
   } catch (e) {
-    t.equal(e.message, 'No matching key found in the set.')
+    t.equal(e.message, 'No matching JWK found in the set.')
   }
 
   t.deepEqual(cache.get(`${alg}:${kid}:${domain}`), null)
@@ -71,7 +71,7 @@ t.test('if the cached key is undefined it should fetch the jwks and set the key 
   const alg = localKey.alg
   const kid = localKey.kid
   const cache = getJwks.cache
-  const key = await getJwks.getKey({ domain, alg, kid })
+  const key = await getJwks.getJwk({ domain, alg, kid })
   t.ok(key)
   t.deepEqual(key, localKey)
   t.deepEqual(cache.get(`${alg}:${kid}:${domain}`), localKey)
@@ -86,9 +86,9 @@ t.test('it will throw an error if no keys are found in the response', async t =>
 
   try {
     const getJwks = buildGetJwks()
-    await getJwks.getKey({ domain, alg, kid })
+    await getJwks.getJwk({ domain, alg, kid })
   } catch (e) {
-    t.equal(e.message, 'No keys found in the set.')
+    t.equal(e.message, 'No JWKS found in the set.')
   }
 })
 
@@ -101,9 +101,9 @@ t.test('it will throw an error if no keys are found in the response', async t =>
 
   try {
     const getJwks = buildGetJwks()
-    await getJwks.getKey({ domain, alg, kid })
+    await getJwks.getJwk({ domain, alg, kid })
   } catch (e) {
-    t.equal(e.message, 'No keys found in the set.')
+    t.equal(e.message, 'No JWKS found in the set.')
   }
 })
 
@@ -114,7 +114,7 @@ t.test('if an issuer provides a domain with a missing trailing slash, it should 
   const localKey = jwks.keys[0]
   const alg = localKey.alg
   const kid = localKey.kid
-  const key = await getJwks.getKey({ domain: domainWithMissingTrailingSlash, alg, kid })
+  const key = await getJwks.getJwk({ domain: domainWithMissingTrailingSlash, alg, kid })
   t.ok(key)
 })
 
@@ -127,7 +127,7 @@ t.test('if there is already a key in cache, it should not make a http request', 
 
   getJwks.cache.set(`${alg}:${kid}:${domain}`, localKey)
   try {
-    const secret = await getJwks.getKey({ domain, alg, kid })
+    const secret = await getJwks.getJwk({ domain, alg, kid })
     t.ok(secret)
   } catch (e) {
     t.throws(e)
