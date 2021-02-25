@@ -5,7 +5,7 @@ const lru = require('tiny-lru')
 const jwkToPem = require('jwk-to-pem')
 
 const MISSING_JWK_ERROR = 'No matching JWK found in the set.'
-const NO_JWKS_ERROR = 'No JWKS found in the set.'
+const NO_JWKS_ERROR = 'No JWKS found in the response.'
 
 function buildGetJwks (cacheProps = {}) {
   const max = cacheProps.max || 100
@@ -13,15 +13,6 @@ function buildGetJwks (cacheProps = {}) {
   const cache = lru(max, ttl)
 
   async function getPublicKey (signatures) {
-    const { domain, alg, kid } = signatures
-    const cacheKey = `${alg}:${kid}:${domain}`
-    const cachedJwk = cache.get(cacheKey)
-
-    if (cachedJwk) {
-      const publicKey = jwkToPem(cachedJwk)
-      return publicKey
-    }
-
     const key = await getJwk(signatures)
     const publicKey = jwkToPem(key)
     return publicKey

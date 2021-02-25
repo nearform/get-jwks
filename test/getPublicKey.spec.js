@@ -90,7 +90,7 @@ t.test('it will throw an error if no keys are found in the JWKS', async t => {
     const getJwks = buildGetJwks()
     await getJwks.getPublicKey({ domain, alg, kid })
   } catch (e) {
-    t.equal(e.message, 'No JWKS found in the set.')
+    t.equal(e.message, 'No JWKS found in the response.')
   }
 })
 
@@ -105,7 +105,7 @@ t.test('it will throw an error if the keys are empty in the JWKS', async t => {
     const getJwks = buildGetJwks()
     await getJwks.getPublicKey({ domain, alg, kid })
   } catch (e) {
-    t.equal(e.message, 'No JWKS found in the set.')
+    t.equal(e.message, 'No JWKS found in the response.')
   }
 })
 
