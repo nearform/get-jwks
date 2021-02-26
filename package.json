@@ -36,8 +36,12 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.3.1",
+    "fast-jwt": "^1.1.0",
+    "fastify": "^3.12.0",
+    "fastify-jwt": "^2.3.0",
     "nock": "^13.0.7",
     "node-cache": "^5.1.2",
+    "request-promise": "^4.2.6",
     "tap": "^14.11.0"
   }
 }

@@ -30,7 +30,6 @@ t.test('getPublicKey should return an error if the request fails', async t => {
 
 t.test('getPublicKey should return an error if alg and kid do not match', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
-
   const expectedError = new Error('No matching JWK found in the set.')
   const getJwks = buildGetJwks()
   t.rejects(
@@ -56,7 +55,6 @@ t.test('if alg and kid do not match any JWKS it should throw an error', async t 
   const alg = 'ALG'
   const kid = 'KEY'
   const cache = getJwks.cache
-
   const expectedError = new Error('No matching JWK found in the set.')
   t.rejects(
     getJwks.getPublicKey({ domain, alg, kid, cache }),
