@@ -2,7 +2,7 @@
 
 const nock = require('nock')
 const t = require('tap')
-const jwks = require('../constants').jwks
+const jwks = require('./constants').jwks
 
 const buildGetJwks = require('../src/get-jwks')
 

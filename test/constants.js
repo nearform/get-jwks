@@ -1,5 +1,6 @@
 'use strict'
 
+/* istanbul ignore next */
 module.exports = {
   jwks: {
     keys: [
