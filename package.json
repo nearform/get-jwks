@@ -41,7 +41,6 @@
     "fastify-jwt": "^2.3.0",
     "nock": "^13.0.7",
     "node-cache": "^5.1.2",
-    "request-promise": "^4.2.6",
     "tap": "^14.11.0"
   }
 }
