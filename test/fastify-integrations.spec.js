@@ -1,7 +1,8 @@
+'use strict'
+
 const t = require('tap')
 const nock = require('nock')
 const Fastify = require('fastify')
-const fastifyJwt = require('fastify-jwt')
 
 const jwks = require('../constants').jwks
 const buildGetJwks = require('../src/get-jwks')
@@ -19,12 +20,7 @@ t.afterEach((done) => {
 
 t.test('integration tests', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
-  const localKey = jwks.keys[1]
-  const domain = 'https://localhost/'
-  const alg = localKey.alg
-  const kid = localKey.kid
   const getJwks = buildGetJwks()
-
 
   t.test('Fastify should start with fastify-jwt and get-jwks', t => {
     const fastify = Fastify()
@@ -37,7 +33,7 @@ t.test('integration tests', async t => {
         callback(null, publicKey)
       }
     })
-    fastify.addHook("onRequest", async (request, reply) => {
+    fastify.addHook('onRequest', async (request, reply) => {
       try {
         await request.jwtVerify()
       } catch (err) {
@@ -58,7 +54,7 @@ t.test('integration tests', async t => {
             method: 'GET',
             url: '/',
             headers: {
-              'Authorization': `Bearer ${ token }`
+              Authorization: `Bearer ${token}`
             }
           })
           t.strictEqual(response.statusCode, 200)
@@ -66,7 +62,5 @@ t.test('integration tests', async t => {
           t.done()
         })
       })
-
-
   })
 })

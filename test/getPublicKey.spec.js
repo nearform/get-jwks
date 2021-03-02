@@ -6,7 +6,6 @@ const jwkToPem = require('jwk-to-pem')
 const jwks = require('../constants').jwks
 const buildGetJwks = require('../src/get-jwks')
 
-
 t.beforeEach((done) => {
   nock.disableNetConnect()
   done()
