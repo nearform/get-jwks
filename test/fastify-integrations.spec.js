@@ -1,5 +1,6 @@
 'use strict'
 
+const { readFileSync } = require('fs')
 const t = require('tap')
 const nock = require('nock')
 const Fastify = require('fastify')
@@ -19,19 +20,42 @@ t.afterEach((done) => {
 })
 
 t.test('integration tests', async t => {
-  nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
+  const domain = 'https://localhost/'
+
+  nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
+
+  const jwk = jwks.keys[1]
   const getJwks = buildGetJwks()
+  const customErrorMessages = {
+    badRequestErrorMessage: (err) => {console.log('Test Error: ', err.message); return err.message},
+    noAuthorizationInHeaderMessage: (err) => {console.log('Test Error: ', err.message); return err.message},
+    authorizationTokenExpiredMessage: (err) => {console.log('Test Error: ', err.message); return err.message},
+    authorizationTokenInvalid: (err) => {console.log('Test Error: ', err.message); return err.message}
+  }
 
   t.test('Fastify should start with fastify-jwt and get-jwks', t => {
     const fastify = Fastify()
     fastify.register(require('fastify-jwt'), {
       ignoreExpiration: true,
       decode: { complete: true },
-      secret: async (request, token, callback) => {
-        const { header: { kid, alg }, payload: { iss: domain } } = token
-        const publicKey = await getJwks.getPublicKey({ kid, domain, alg })
-        callback(null, publicKey)
-      }
+      secret: {
+        private: {
+          passphrase: 'mysecret',
+          key: readFileSync(`${__dirname}/private.pem`, 'utf8')
+        },
+        public: async (request, token, callback) => {
+          const { header: { kid, alg }, payload: { iss } } = token
+          const key = await getJwks.getJwk({ kid, domain: iss, alg })
+          const publicKey = await getJwks.getPublicKey({ kid, domain: iss, alg })
+          callback(null, publicKey)
+        }
+      },
+      sign: {
+        keyid: jwk.kid,
+        algorithm: jwk.alg,
+        issuer: domain
+      },
+      messages: customErrorMessages
     })
     fastify.addHook('onRequest', async (request, reply) => {
       try {
@@ -40,26 +64,30 @@ t.test('integration tests', async t => {
         reply.send(err)
       }
     })
-    fastify.get('/', async () => {
-      return 'hello world'
+    fastify.get('/', async (request, reply) => {
+      return request.user.name
     })
 
     t.tearDown(fastify.close.bind(fastify))
-
     fastify.listen(3000)
-      .then(() => {
+      .then(async () => {
         t.test('requests the "/" route', async t => {
-          const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IktFWV8xIiwibiI6IjEyMyJ9.eyJuaWNrbmFtZSI6IkpvZSBCbG9nZ3MiLCJuYW1lIjoiam9lQGJsb2dncy5jb20iLCJpc3MiOiJodHRwczovL2xvY2FsaG9zdC8iLCJzdWIiOiJhdXRoMHwxMjM0NSIsImF1ZCI6IjEyMzQ1IiwiaWF0IjoxNjE0MDc1OTg0LCJleHAiOjE2MTQxMTE5ODQsImF0X2hhc2giOiJXTWRKZFJ1TUhTdkZhb0pIYXdXTVl3Iiwibm9uY2UiOiIyU1EucVhQTDNaQW85c3F1VW1FQWhnQV92UkdWdDVxSCJ9.WkYnHstBpvgBNnmDM7JXoQgwFYKq8_Cio1I7o3tLflo'
-          const response = await fastify.inject({
-            method: 'GET',
-            url: '/',
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          })
-          t.strictEqual(response.statusCode, 200)
-          t.strictEqual(response.body, 'hello world')
-          t.done()
+          const token = fastify.jwt.sign({ name: 'John Doe' })
+          try {
+            const response = await fastify.inject({
+              method: 'GET',
+              url: '/',
+              headers: {
+                authorization: `Bearer ${token}`
+              }
+            })
+            t.strictEqual(response.statusCode, 200)
+            t.strictEqual(response.body, 'John Doe')
+            t.end()
+            console.log('destroy!!!')
+          } catch (err) {
+            t.fail(err)
+          }
         })
       })
   })

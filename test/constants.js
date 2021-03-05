@@ -13,11 +13,11 @@ module.exports = {
         use: 'sig'
       },
       {
-        alg: 'HS256',
-        kid: 'KEY_1',
+        alg: 'RS256',
+        kid: 'ZjNUcSecDxubkCN3rKJZx6x5uUbbfTFgiXEurrT61j8',
         e: 'AQAB',
         kty: 'RSA',
-        n: "123",
+        n: '5uuyz3Zm9OVv-Ex7oF10AI_UE2LI0-ASGFzGOLzspObXF0IhUJRt757N9PjA_a3XswyCAs-nQZF1wHJfG9J0ge_Mkgcf-Hr_WG_r1CwFYboSUUXYcW85StF3PgPdUg0v-IHW6v88IQNyhFgLfWbncUT4ihZ4vx_BAoWSIut92DZamdtJTEgzaAQaw-u2EKlkTZCrRrrbKV1mMHtPOx-fqhwOE8C_cAh3ajA4QryCKhs6RnRltJVtVgpsyz4FqSprncWBKR9ZpONIBokTggd-_myiYZa3ruW9k27z8O_V8nnsd7Kl0HmucnN0vcqIBQ8zdYtNxJHUFzE3ut6Pusx2qw',
         use: 'sig'
       }
     ]
