@@ -1,6 +1,7 @@
 'use strict'
 
 const { readFileSync } = require('fs')
+const path = require('path')
 const t = require('tap')
 const nock = require('nock')
 const Fastify = require('fastify')
@@ -27,10 +28,10 @@ t.test('integration tests', t => {
   const jwk = jwks.keys[1]
   const getJwks = buildGetJwks()
   const customErrorMessages = {
-    badRequestErrorMessage: (err) => {console.log('Test Error: ', err.message); return err.message},
-    noAuthorizationInHeaderMessage: (err) => {console.log('Test Error: ', err.message); return err.message},
-    authorizationTokenExpiredMessage: (err) => {console.log('Test Error: ', err.message); return err.message},
-    authorizationTokenInvalid: (err) => {console.log('Test Error: ', err.message); return err.message}
+    badRequestErrorMessage: (err) => { console.log('Test Error: ', err.message); return err.message },
+    noAuthorizationInHeaderMessage: (err) => { console.log('Test Error: ', err.message); return err.message },
+    authorizationTokenExpiredMessage: (err) => { console.log('Test Error: ', err.message); return err.message },
+    authorizationTokenInvalid: (err) => { console.log('Test Error: ', err.message); return err.message }
   }
 
   const fastify = Fastify()
@@ -40,11 +41,10 @@ t.test('integration tests', t => {
     secret: {
       private: {
         passphrase: 'mysecret',
-        key: readFileSync(`${__dirname}/private.pem`, 'utf8')
+        key: readFileSync(path.join(__dirname, 'private.pem'), 'utf8')
       },
       public: async (request, token, callback) => {
         const { header: { kid, alg }, payload: { iss } } = token
-        const key = await getJwks.getJwk({ kid, domain: iss, alg })
         const publicKey = await getJwks.getPublicKey({ kid, domain: iss, alg })
         callback(null, publicKey)
       }
