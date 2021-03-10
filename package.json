@@ -7,7 +7,7 @@
     "node": ">=10"
   },
   "scripts": {
-    "test": "tap --test-ignore=test/constants.js",
+    "test": "tap --files=test/**/*.spec.js",
     "lint": "eslint src/**/*.js test/**/*.js",
     "ci": "npm run lint && tap --no-color --reporter=spec --coverage-report=json --coverage-report=text --100 test/*.spec.js test/**/*.spec.js"
   },
