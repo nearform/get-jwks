@@ -28,7 +28,7 @@ t.test('integration tests', t => {
 
   const privateKey = readFileSync(path.join(__dirname, 'private.pem'), 'utf8')
   const jwk = jwks.keys[1] // https://russelldavies.github.io/jwk-creator/
-  const token = jwt.sign({ name: 'Jane Doe' }, privateKey, { algorithm: jwk.alg, issuer: domain, keyid: jwk.kid });
+  const token = jwt.sign({ name: 'Jane Doe' }, privateKey, { algorithm: jwk.alg, issuer: domain, keyid: jwk.kid })
 
   const customErrorMessages = {
     badRequestErrorMessage: (err) => { console.log('Test Error: ', err.message); return err.message },
