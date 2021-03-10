@@ -13,11 +13,11 @@ module.exports = {
         use: 'sig'
       },
       {
-        alg: 'RS256',
-        kid: 'ZjNUcSecDxubkCN3rKJZx6x5uUbbfTFgiXEurrT61j8',
-        e: 'AQAB',
         kty: 'RSA',
-        n: '5uuyz3Zm9OVv-Ex7oF10AI_UE2LI0-ASGFzGOLzspObXF0IhUJRt757N9PjA_a3XswyCAs-nQZF1wHJfG9J0ge_Mkgcf-Hr_WG_r1CwFYboSUUXYcW85StF3PgPdUg0v-IHW6v88IQNyhFgLfWbncUT4ihZ4vx_BAoWSIut92DZamdtJTEgzaAQaw-u2EKlkTZCrRrrbKV1mMHtPOx-fqhwOE8C_cAh3ajA4QryCKhs6RnRltJVtVgpsyz4FqSprncWBKR9ZpONIBokTggd-_myiYZa3ruW9k27z8O_V8nnsd7Kl0HmucnN0vcqIBQ8zdYtNxJHUFzE3ut6Pusx2qw',
+        n: '7KRDtHuJ9-R1cYzB9-E4TUVazzv93MMmMo_38nOwEKNxlWs7OVg397d0SCsdmBbcbr4KTMeblY4a-VOzLVZ5ycYgi7ZbMvv7RzunKuPsjm7m863dLnPUFOptsFVANDOHgDYopKBFYoIMoxjXU7bOzLL-Ez0oO5keT1hGZkJT_7GRvKyYigugN4lLia4Tb3AmUN60wiloyQCJ2xYATWHB0e4sTwIDq6MFXhVFHXV6ZBU7sDh0HqmP08gJtMnsFOE7zUcbpqTvpz5nAR6EyUs7R0g61WmGUfQTrE6byVCZ8w0NN4Xer6IQBjnDZWbmf69jsAFFAYDCe-omWXY526qLQw',
+        e: 'AQAB',
+        alg: 'RS256',
+        kid: 'KEY_1',
         use: 'sig'
       }
     ]
