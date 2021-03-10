@@ -18,28 +18,19 @@ t.afterEach((done) => {
   done()
 })
 
-t.test('fastify-jwt integration tests', t => {
+t.test('fastify-jwt integration tests', async t => {
   nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
-
-  const customErrorMessages = {
-    badRequestErrorMessage: (err) => { console.log('Test Error: ', err.message); return err.message },
-    noAuthorizationInHeaderMessage: (err) => { console.log('Test Error: ', err.message); return err.message },
-    authorizationTokenExpiredMessage: (err) => { console.log('Test Error: ', err.message); return err.message },
-    authorizationTokenInvalid: (err) => { console.log('Test Error: ', err.message); return err.message }
-  }
 
   const fastify = Fastify()
   const getJwks = buildGetJwks()
 
   fastify.register(require('fastify-jwt'), {
-    ignoreExpiration: true,
     decode: { complete: true },
     secret: async (request, token, callback) => {
       const { header: { kid, alg }, payload: { iss } } = token
       const publicKey = await getJwks.getPublicKey({ kid, domain: iss, alg })
       callback(null, publicKey)
-    },
-    messages: customErrorMessages
+    }
   })
 
   fastify.addHook('onRequest', async (request, reply) => {
@@ -53,19 +44,16 @@ t.test('fastify-jwt integration tests', t => {
     return request.user.name
   })
 
-  t.tearDown(fastify.close.bind(fastify))
+  const response = await fastify.inject({
+    method: 'GET',
+    url: '/',
+    headers: {
+      authorization: `Bearer ${token}`
+    }
+  })
 
-  fastify.listen(3000)
-    .then(async () => {
-      const response = await fastify.inject({
-        method: 'GET',
-        url: '/',
-        headers: {
-          authorization: `Bearer ${token}`
-        }
-      })
-      t.strictEqual(response.statusCode, 200)
-      t.strictEqual(response.body, 'Jane Doe')
-      t.done()
-    })
+  t.strictEqual(response.statusCode, 200)
+  t.strictEqual(response.body, 'Jane Doe')
+  t.done()
+
 })
