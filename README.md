@@ -72,4 +72,39 @@ const getJwks = buildGetJwks({
 })
 ```
 
+## Integration Examples
+
+### fastify-jwt
+[fastify-jwt](https://github.com/fastify/fastify-jwt) is a Json Web Token plugin for [Fastify](https://www.fastify.io/).
+
+The following example includes a scenario where you'd like to varify a JWT against a valid JWK on any request to your Fastify server.  Any request with a valid JWT auth token in the header will return a successful response, otherwise will respond with an authentication error.
+
+```javascript
+const Fastify = require('fastify')
+const fjwt = require('fastify-jwt')
+const buildGetJwks = require('get-jwks')
+
+const fastify = Fastify()
+const getJwks = buildGetJwks()
+
+fastify.register(fjwt, {
+  decode: { complete: true },
+  secret: async (request, token, callback) => {
+    const { header: { kid, alg }, payload: { iss } } = token
+    const publicKey = await getJwks.getPublicKey({ kid, domain: iss, alg })
+    callback(null, publicKey)
+  }
+})
+
+fastify.addHook('onRequest', async (request, reply) => {
+  try {
+    await request.jwtVerify()
+  } catch (err) {
+    reply.send(err)
+  }
+})
+
+fastify.listen(3000)
+```
+
 
