@@ -18,7 +18,7 @@ t.afterEach((done) => {
   done()
 })
 
-t.test('integration tests', t => {
+t.test('fastify-jwt integration tests', t => {
   nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
 
   const customErrorMessages = {
