@@ -4,14 +4,13 @@ const t = require('tap')
 const nock = require('nock')
 const jwkToPem = require('jwk-to-pem')
 
-const jwks = require('./constants').jwks
+const { jwks, domain } = require('./constants')
 
 const buildGetJwks = require('../src/get-jwks')
 
 t.test('if there is already a key in cache, it should not make a http request', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
-  const domain = 'https://localhost/'
   const localKey = jwks.keys[0]
   const alg = localKey.alg
   const kid = localKey.kid
@@ -29,7 +28,6 @@ t.test('if there is already a key in cache, it should not make a http request', 
 t.test('if initialized without any cache settings it should use default values', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
-  const domain = 'https://localhost/'
   const cache = getJwks.cache
   const localKey = jwks.keys[0]
   const alg = localKey.alg
@@ -46,7 +44,6 @@ t.test('if initialized without any cache settings it should use default values',
 t.test('calling the clear cache function resets the cache and clears keys', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
-  const domain = 'https://localhost/'
   const localKey = jwks.keys[0]
   const alg = localKey.alg
   const kid = localKey.kid

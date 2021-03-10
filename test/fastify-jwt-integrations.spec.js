@@ -1,14 +1,11 @@
 'use strict'
 
-const { readFileSync } = require('fs')
-const path = require('path')
 const t = require('tap')
 const nock = require('nock')
 const Fastify = require('fastify')
+const { jwks, token, domain } = require('./constants')
 
-const jwks = require('./constants').jwks
 const buildGetJwks = require('../src/get-jwks')
-const jwt = require('jsonwebtoken')
 
 t.beforeEach((done) => {
   nock.disableNetConnect()
@@ -22,13 +19,7 @@ t.afterEach((done) => {
 })
 
 t.test('integration tests', t => {
-  const domain = 'https://localhost/'
-
   nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
-
-  const privateKey = readFileSync(path.join(__dirname, 'private.pem'), 'utf8')
-  const jwk = jwks.keys[1] // https://russelldavies.github.io/jwk-creator/
-  const token = jwt.sign({ name: 'Jane Doe' }, privateKey, { algorithm: jwk.alg, issuer: domain, keyid: jwk.kid })
 
   const customErrorMessages = {
     badRequestErrorMessage: (err) => { console.log('Test Error: ', err.message); return err.message },
