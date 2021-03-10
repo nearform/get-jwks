@@ -55,5 +55,4 @@ t.test('fastify-jwt integration tests', async t => {
   t.strictEqual(response.statusCode, 200)
   t.strictEqual(response.body, 'Jane Doe')
   t.done()
-
 })
