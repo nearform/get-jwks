@@ -3,6 +3,7 @@
 const t = require('tap')
 const nock = require('nock')
 const Fastify = require('fastify')
+const fjwt = require('fastify-jwt')
 const { jwks, token, domain } = require('./constants')
 
 const buildGetJwks = require('../src/get-jwks')
@@ -24,12 +25,12 @@ t.test('fastify-jwt integration tests', async t => {
   const fastify = Fastify()
   const getJwks = buildGetJwks()
 
-  fastify.register(require('fastify-jwt'), {
+  fastify.register(fjwt, {
     decode: { complete: true },
-    secret: async (request, token, callback) => {
+    secret: (request, token, callback) => {
       const { header: { kid, alg }, payload: { iss } } = token
-      const publicKey = await getJwks.getPublicKey({ kid, domain: iss, alg })
-      callback(null, publicKey)
+      getJwks.getPublicKey({ kid, domain: iss, alg })
+        .then(publicKey => callback(null, publicKey), callback)
     }
   })
 
@@ -40,6 +41,7 @@ t.test('fastify-jwt integration tests', async t => {
       reply.send(err)
     }
   })
+
   fastify.get('/', async (request, reply) => {
     return request.user.name
   })

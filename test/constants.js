@@ -1,7 +1,5 @@
 'use strict'
 
-// https://russelldavies.github.io/jwk-creator/
-
 const { readFileSync } = require('fs')
 const path = require('path')
 const jwt = require('jsonwebtoken')

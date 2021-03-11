@@ -6,8 +6,6 @@ Fetch utils for JWKS keys
 
 ## Installation
 
-Just run:
-
 ```bash
 npm install get-jwks
 ```
@@ -89,10 +87,10 @@ const getJwks = buildGetJwks()
 
 fastify.register(fjwt, {
   decode: { complete: true },
-  secret: async (request, token, callback) => {
+  secret: (request, token, callback) => {
     const { header: { kid, alg }, payload: { iss } } = token
-    const publicKey = await getJwks.getPublicKey({ kid, domain: iss, alg })
-    callback(null, publicKey)
+    getJwks.getPublicKey({ kid, domain: iss, alg })
+      .then(publicKey => callback(null, publicKey), callback)
   }
 })
 
