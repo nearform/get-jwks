@@ -19,14 +19,15 @@ t.afterEach((done) => {
 })
 
 t.test('fast-jwt integration tests', async t => {
-  nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
+  const myDomain = domain
+  nock(myDomain).get('/.well-known/jwks.json').reply(200, jwks)
 
   const decodeComplete = createDecoder({ complete: true })
   const sections = decodeComplete(token)
-  const { header: { kid, alg }, payload: { iss } } = sections
+  const { header: { kid, alg } } = sections
 
   const getJwks = buildGetJwks()
-  const publicKey = await getJwks.getPublicKey({ kid, domain: iss, alg })
+  const publicKey = await getJwks.getPublicKey({ kid, domain: myDomain, alg })
 
   const verifyWithPromise = createVerifier({ key: publicKey })
   const payload = await verifyWithPromise(token)
