@@ -35,11 +35,7 @@ t.test('fastify-jwt integration tests', async t => {
   })
 
   fastify.addHook('onRequest', async (request, reply) => {
-    try {
-      await request.jwtVerify()
-    } catch (err) {
-      reply.send(err)
-    }
+    await request.jwtVerify()
   })
 
   fastify.get('/', async (request, reply) => {

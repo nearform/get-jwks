@@ -95,11 +95,7 @@ fastify.register(fjwt, {
 })
 
 fastify.addHook('onRequest', async (request, reply) => {
-  try {
-    await request.jwtVerify()
-  } catch (err) {
-    reply.send(err)
-  }
+  await request.jwtVerify()
 })
 
 fastify.listen(3000)
