@@ -3,7 +3,7 @@
 const t = require('tap')
 const nock = require('nock')
 const { createDecoder, createVerifier } = require('fast-jwt')
-const { jwks, token, domain } = require('./constants')
+const { jwks, token } = require('./constants')
 
 const buildGetJwks = require('../src/get-jwks')
 
@@ -19,7 +19,7 @@ t.afterEach((done) => {
 })
 
 t.test('fast-jwt integration tests', async t => {
-  const myDomain = domain
+  const myDomain = 'https://localhost/'
   nock(myDomain).get('/.well-known/jwks.json').reply(200, jwks)
 
   const decodeComplete = createDecoder({ complete: true })
