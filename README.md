@@ -12,9 +12,28 @@ npm install get-jwks
 
 ## Usage
 
+### Options
+
+```js
+const buildGetJwks = require('get-jwks')
+
+const getJwks = buildGetJwks({
+  max: 500,
+  ttl: 60 * 1000,
+  allowedDomains: ['https://example.com']
+})
+```
+
+- `max`: Max items to hold in cache, the default setting is 100.
+- `ttl`: Milliseconds an item will remain in cache; lazy expiration upon next get() of an item, the default setting is 60000.
+- `allowedDomains`: Array of allowed domains. By default all domains are allowed.
+
+> `max` and `ttl` are provided to [tiny-lru](https://www.npmjs.com/package/tiny-lru).
+
+
 ### getJwk
 
-```javascript
+```js
 const buildGetJwks = require('get-jwks')
 
 const getJwks = buildGetJwks()
@@ -24,8 +43,9 @@ const jwk = await getJwks.getJwk({
   alg: 'token_alg',
   kid: 'token_kid'
 })
-
 ```
+
+
 Calling the asynchronous function `getJwk` will fetch the [JSON Web Key](https://tools.ietf.org/html/rfc7517), and verify if any of the public keys matches the `alg` and `kid` values of your JWT token.  It will cache the matching key so if called again it will not make another request to retrieve a JWKS.
 - `domain`: A string containing the domain (ie: `https://www.example.com/`) from which the library should fetch the JWKS. `get-jwks` will add the JWKS location (`.well-known/jwks.json`) to form the final url (ie: `https://www.example.com/.well-known/jwks.json`).
 - `alg`: The alg header parameter represents the cryptographic algorithm used to secure the token. You will find it in your decoded JWT.
@@ -33,7 +53,7 @@ Calling the asynchronous function `getJwk` will fetch the [JSON Web Key](https:/
 
 ### getPublicKey
 
-```javascript
+```js
 const buildGetJwks = require('get-jwks')
 
 const getJwks = buildGetJwks()
@@ -50,25 +70,10 @@ Calling the asynchronous function `getPublicKey` will run the `getJwk` function 
 
 ### clearCache
 
-```javascript
+```js
 getJwks.clearCache()
 ```
 Clears all contents of the cache
-
-### Optional cache constuctor
-
-When creating the cache constructor you pass some optional parameters based off the [tiny-lru](https://www.npmjs.com/package/tiny-lru) package.
-- `max`: Max items to hold in cache, the default setting is 100.
-- `ttl`: Milliseconds an item will remain in cache; lazy expiration upon next get() of an item, the default setting is 60000.
-
-```javascript
-const buildGetJwks = require('get-jwks')
-
-const getJwks = buildGetJwks({
-  max: 500,
-  ttl: 60 * 1000
-})
-```
 
 ## Integration Examples
 

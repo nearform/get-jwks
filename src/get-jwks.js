@@ -4,31 +4,51 @@ const fetch = require('node-fetch')
 const lru = require('tiny-lru')
 const jwkToPem = require('jwk-to-pem')
 
-const MISSING_JWK_ERROR = 'No matching JWK found in the set.'
-const NO_JWKS_ERROR = 'No JWKS found in the response.'
+const errors = {
+  NO_JWKS: 'No JWKS found in the response.',
+  JWK_NOT_FOUND: 'No matching JWK found in the set.',
+  DOMAIN_NOT_ALLOWED: 'The domain is not allowed.'
+}
 
-function buildGetJwks (cacheProps = {}) {
-  const max = cacheProps.max || 100
-  const ttl = cacheProps.ttl || 60 * 1000
+function ensureTrailingSlash (domain) {
+  return domain.endsWith('/') ? domain : `${domain}/`
+}
+
+function buildGetJwks (options = {}) {
+  const max = options.max || 100
+  const ttl = options.ttl || 60 * 1000
+  const allowedDomains = (options.allowedDomains || []).map(ensureTrailingSlash)
+
   const cache = lru(max, ttl)
 
-  async function getPublicKey (signatures) {
-    const key = await getJwk(signatures)
-    const publicKey = jwkToPem(key)
-    return publicKey
+  async function getPublicKey (signature) {
+    return jwkToPem(await this.getJwk(signature))
   }
 
-  async function getJwk (signatures) {
-    const { domain, alg, kid } = signatures
-    const cacheKey = `${alg}:${kid}:${domain}`
+  async function getJwk (signature) {
+    const { domain, alg, kid } = signature
+    const normalizedDomain = ensureTrailingSlash(domain)
+
+    if (allowedDomains.length && !allowedDomains.includes(normalizedDomain)) {
+      throw new Error(errors.DOMAIN_NOT_ALLOWED)
+    }
+
+    const cacheKey = `${alg}:${kid}:${normalizedDomain}`
     const cachedJwk = cache.get(cacheKey)
 
     if (cachedJwk) {
       return cachedJwk
     }
 
-    const issuerDomain = domain.endsWith('/') ? domain : `${domain}/`
-    const response = await fetch(`${issuerDomain}.well-known/jwks.json`, { timeout: 5000 })
+    const jwkPromise = retrieveJwk(normalizedDomain, alg, kid)
+
+    cache.set(cacheKey, jwkPromise)
+
+    return jwkPromise
+  }
+
+  async function retrieveJwk (domain, alg, kid) {
+    const response = await fetch(`${domain}.well-known/jwks.json`, { timeout: 5000 })
     const body = await response.json()
 
     if (!response.ok) {
@@ -39,16 +59,15 @@ function buildGetJwks (cacheProps = {}) {
     }
 
     if (!body.keys || body.keys.length === 0) {
-      throw new Error(NO_JWKS_ERROR)
+      throw new Error(errors.NO_JWKS)
     }
 
-    const jwk = body.keys.find(k => k.alg === alg && k.kid === kid)
+    const jwk = body.keys.find(key => key.alg === alg && key.kid === kid)
 
     if (!jwk) {
-      throw new Error(MISSING_JWK_ERROR)
+      throw new Error(errors.JWK_NOT_FOUND)
     }
 
-    cache.set(cacheKey, jwk)
     return jwk
   }
 

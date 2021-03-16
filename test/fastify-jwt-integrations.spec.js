@@ -4,8 +4,8 @@ const t = require('tap')
 const nock = require('nock')
 const Fastify = require('fastify')
 const fjwt = require('fastify-jwt')
-const { jwks, token, domain } = require('./constants')
 
+const { jwks, token, domain } = require('./constants')
 const buildGetJwks = require('../src/get-jwks')
 
 t.beforeEach((done) => {

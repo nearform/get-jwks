@@ -9,13 +9,12 @@ const { jwks, domain } = require('./constants')
 const buildGetJwks = require('../src/get-jwks')
 
 t.test('if there is already a key in cache, it should not make a http request', async t => {
-  nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
   const localKey = jwks.keys[0]
   const alg = localKey.alg
   const kid = localKey.kid
 
-  getJwks.cache.set(`${alg}:${kid}:${domain}`, localKey)
+  getJwks.cache.set(`${alg}:${kid}:${domain}`, Promise.resolve(localKey))
 
   const publicKey = await getJwks.getPublicKey({ domain, alg, kid })
   const jwk = await getJwks.getJwk({ domain, alg, kid })
@@ -29,11 +28,10 @@ t.test('if initialized without any cache settings it should use default values',
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
   const cache = getJwks.cache
-  const localKey = jwks.keys[0]
-  const alg = localKey.alg
-  const kid = localKey.kid
+  const [{ alg, kid }] = jwks.keys
   const publicKey = await getJwks.getPublicKey({ domain, alg, kid })
   const jwk = await getJwks.getJwk({ domain, alg, kid })
+
   t.ok(publicKey)
   t.ok(jwk)
   t.ok(getJwks.cache)
@@ -43,6 +41,7 @@ t.test('if initialized without any cache settings it should use default values',
 
 t.test('calling the clear cache function resets the cache and clears keys', async t => {
   nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
+
   const getJwks = buildGetJwks()
   const localKey = jwks.keys[0]
   const alg = localKey.alg
@@ -50,9 +49,12 @@ t.test('calling the clear cache function resets the cache and clears keys', asyn
   const cache = getJwks.cache
   const publicKey = await getJwks.getPublicKey({ domain, alg, kid })
   const key = await getJwks.getJwk({ domain, alg, kid })
+
   t.ok(publicKey)
   t.ok(key)
-  t.deepEqual(cache.get(`${alg}:${kid}:${domain}`), localKey)
+  t.deepEqual(await cache.get(`${alg}:${kid}:${domain}`), localKey)
+
   getJwks.clearCache()
-  t.equal(cache.get(`${alg}:${kid}:${domain}`), undefined)
+
+  t.equal(await cache.get(`${alg}:${kid}:${domain}`), undefined)
 })
