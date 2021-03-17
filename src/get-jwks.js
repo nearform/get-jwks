@@ -1,36 +1,41 @@
 'use strict'
 
 const fetch = require('node-fetch')
-const lru = require('tiny-lru')
+const LRU = require('lru-cache')
 const jwkToPem = require('jwk-to-pem')
 
 const errors = {
   NO_JWKS: 'No JWKS found in the response.',
   JWK_NOT_FOUND: 'No matching JWK found in the set.',
-  DOMAIN_NOT_ALLOWED: 'The domain is not allowed.'
+  DOMAIN_NOT_ALLOWED: 'The domain is not allowed.',
 }
 
-function ensureTrailingSlash (domain) {
+function ensureTrailingSlash(domain) {
   return domain.endsWith('/') ? domain : `${domain}/`
 }
 
-function buildGetJwks (options = {}) {
+function buildGetJwks(options = {}) {
   const max = options.max || 100
-  const ttl = options.ttl || 60 * 1000
+  const maxAge = options.maxAge || 60 * 1000 /* 1 minute */
   const allowedDomains = (options.allowedDomains || []).map(ensureTrailingSlash)
 
-  const cache = lru(max, ttl)
+  const staleCache = new LRU({ max: max * 2, maxAge })
+  const cache = new LRU({
+    max,
+    maxAge,
+    dispose: staleCache.set.bind(staleCache),
+  })
 
-  async function getPublicKey (signature) {
+  async function getPublicKey(signature) {
     return jwkToPem(await this.getJwk(signature))
   }
 
-  async function getJwk (signature) {
+  function getJwk(signature) {
     const { domain, alg, kid } = signature
     const normalizedDomain = ensureTrailingSlash(domain)
 
     if (allowedDomains.length && !allowedDomains.includes(normalizedDomain)) {
-      throw new Error(errors.DOMAIN_NOT_ALLOWED)
+      return Promise.reject(new Error(errors.DOMAIN_NOT_ALLOWED))
     }
 
     const cacheKey = `${alg}:${kid}:${normalizedDomain}`
@@ -40,15 +45,29 @@ function buildGetJwks (options = {}) {
       return cachedJwk
     }
 
-    const jwkPromise = retrieveJwk(normalizedDomain, alg, kid)
+    const jwkPromise = retrieveJwk(normalizedDomain, alg, kid).catch(
+      async err => {
+        const stale = staleCache.get(cacheKey)
+
+        cache.del(cacheKey)
+
+        if (stale) {
+          return stale
+        }
+
+        throw err
+      }
+    )
 
     cache.set(cacheKey, jwkPromise)
 
     return jwkPromise
   }
 
-  async function retrieveJwk (domain, alg, kid) {
-    const response = await fetch(`${domain}.well-known/jwks.json`, { timeout: 5000 })
+  async function retrieveJwk(normalizedDomain, alg, kid) {
+    const response = await fetch(`${normalizedDomain}.well-known/jwks.json`, {
+      timeout: 5000,
+    })
     const body = await response.json()
 
     if (!response.ok) {
@@ -74,8 +93,8 @@ function buildGetJwks (options = {}) {
   return {
     getPublicKey,
     getJwk,
-    clearCache: () => cache.clear(),
-    cache
+    cache,
+    staleCache,
   }
 }
 

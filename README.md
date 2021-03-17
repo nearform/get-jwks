@@ -18,18 +18,17 @@ npm install get-jwks
 const buildGetJwks = require('get-jwks')
 
 const getJwks = buildGetJwks({
-  max: 500,
-  ttl: 60 * 1000,
-  allowedDomains: ['https://example.com']
+  max: 100,
+  maxAge: 60 * 1000,
+  allowedDomains: ['https://example.com'],
 })
 ```
 
-- `max`: Max items to hold in cache, the default setting is 100.
-- `ttl`: Milliseconds an item will remain in cache; lazy expiration upon next get() of an item, the default setting is 60000.
+- `max`: Max items to hold in cache. Defaults to 100.
+- `maxAge`: Milliseconds an item will remain in cache. Defaults to 60s.
 - `allowedDomains`: Array of allowed domains. By default all domains are allowed.
 
-> `max` and `ttl` are provided to [tiny-lru](https://www.npmjs.com/package/tiny-lru).
-
+> `max` and `maxAge` are provided to [lru-cache](https://www.npmjs.com/package/lru-cache).
 
 ### getJwk
 
@@ -41,13 +40,13 @@ const getJwks = buildGetJwks()
 const jwk = await getJwks.getJwk({
   domain: 'https://exampe.com/',
   alg: 'token_alg',
-  kid: 'token_kid'
+  kid: 'token_kid',
 })
 ```
 
+Calling the asynchronous function `getJwk` will fetch the [JSON Web Key](https://tools.ietf.org/html/rfc7517), and verify if any of the public keys matches the provided `alg` and `kid` values. It will cache the matching key so if called again it will not make another request to retrieve a JWKS. It will also use a cache to store stale values which is used in case of errors as a fallback mechanism.
 
-Calling the asynchronous function `getJwk` will fetch the [JSON Web Key](https://tools.ietf.org/html/rfc7517), and verify if any of the public keys matches the `alg` and `kid` values of your JWT token.  It will cache the matching key so if called again it will not make another request to retrieve a JWKS.
-- `domain`: A string containing the domain (ie: `https://www.example.com/`) from which the library should fetch the JWKS. `get-jwks` will add the JWKS location (`.well-known/jwks.json`) to form the final url (ie: `https://www.example.com/.well-known/jwks.json`).
+- `domain`: A string containing the domain (e.g. `https://www.example.com/`, with or without trailing slash) from which the library should fetch the JWKS. `get-jwks` will add the JWKS location (`.well-known/jwks.json`) to form the final url (ie: `https://www.example.com/.well-known/jwks.json`).
 - `alg`: The alg header parameter represents the cryptographic algorithm used to secure the token. You will find it in your decoded JWT.
 - `kid`: The kid is a hint that indicates which key was used to secure the JSON web signature of the token. You will find it in your decoded JWT.
 
@@ -61,27 +60,21 @@ const getJwks = buildGetJwks()
 const publicKey = await getJwks.getPublicKey({
   domain: 'https://exampe.com/',
   alg: 'token_alg',
-  kid: 'token_kid'
+  kid: 'token_kid',
 })
-
 ```
 
-Calling the asynchronous function `getPublicKey` will run the `getJwk` function to retrieve a matching key, then convert it to a PEM public key.  It requires the same arguments as `getJwk`.
-
-### clearCache
-
-```js
-getJwks.clearCache()
-```
-Clears all contents of the cache
+Calling the asynchronous function `getPublicKey` will run the `getJwk` function to retrieve a matching key, then convert it to a PEM public key. It requires the same arguments as `getJwk`.
 
 ## Integration Examples
+
+This library can be easily used with other JWT libraries.
 
 ### fastify-jwt
 
 [fastify-jwt](https://github.com/fastify/fastify-jwt) is a Json Web Token plugin for [Fastify](https://www.fastify.io/).
 
-The following example includes a scenario where you'd like to varify a JWT against a valid JWK on any request to your Fastify server.  Any request with a valid JWT auth token in the header will return a successful response, otherwise will respond with an authentication error.
+The following example includes a scenario where you'd like to varify a JWT against a valid JWK on any request to your Fastify server. Any request with a valid JWT auth token in the header will return a successful response, otherwise will respond with an authentication error.
 
 ```js
 const Fastify = require('fastify')
@@ -94,10 +87,14 @@ const getJwks = buildGetJwks()
 fastify.register(fjwt, {
   decode: { complete: true },
   secret: (request, token, callback) => {
-    const { header: { kid, alg }, payload: { iss } } = token
-    getJwks.getPublicKey({ kid, domain: iss, alg })
+    const {
+      header: { kid, alg },
+      payload: { iss },
+    } = token
+    getJwks
+      .getPublicKey({ kid, domain: iss, alg })
       .then(publicKey => callback(null, publicKey), callback)
-  }
+  },
 })
 
 fastify.addHook('onRequest', async (request, reply) => {
@@ -118,9 +115,9 @@ const { createDecoder, createVerifier } = require('fast-jwt')
 const buildGetJwks = require('get-jwks')
 
 // JWT signed with JWKS
-const token = '...' 
+const token = '...'
 
-// well known url of the token issuer 
+// well known url of the token issuer
 // often encoded as the `iss` property of the token payload
 const domain = 'https://...'
 
@@ -128,7 +125,9 @@ const domain = 'https://...'
 const decode = createDecoder({ complete: true })
 
 // decode the token and extract the header
-const { header: { kid, alg } } = decode(token)
+const {
+  header: { kid, alg },
+} = decode(token)
 
 const getJwks = buildGetJwks()
 const publicKey = await getJwks.getPublicKey({ kid, domain, alg })

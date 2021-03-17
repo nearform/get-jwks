@@ -8,15 +8,13 @@ const fjwt = require('fastify-jwt')
 const { jwks, token, domain } = require('./constants')
 const buildGetJwks = require('../src/get-jwks')
 
-t.beforeEach((done) => {
+t.beforeEach(async () => {
   nock.disableNetConnect()
-  done()
 })
 
-t.afterEach((done) => {
+t.afterEach(async () => {
   nock.cleanAll()
   nock.enableNetConnect()
-  done()
 })
 
 t.test('fastify-jwt integration tests', async t => {
@@ -28,17 +26,21 @@ t.test('fastify-jwt integration tests', async t => {
   fastify.register(fjwt, {
     decode: { complete: true },
     secret: (request, token, callback) => {
-      const { header: { kid, alg }, payload: { iss } } = token
-      getJwks.getPublicKey({ kid, domain: iss, alg })
+      const {
+        header: { kid, alg },
+        payload: { iss },
+      } = token
+      getJwks
+        .getPublicKey({ kid, domain: iss, alg })
         .then(publicKey => callback(null, publicKey), callback)
-    }
+    },
   })
 
-  fastify.addHook('onRequest', async (request, reply) => {
+  fastify.addHook('onRequest', async request => {
     await request.jwtVerify()
   })
 
-  fastify.get('/', async (request, reply) => {
+  fastify.get('/', async request => {
     return request.user.name
   })
 
@@ -46,8 +48,8 @@ t.test('fastify-jwt integration tests', async t => {
     method: 'GET',
     url: '/',
     headers: {
-      authorization: `Bearer ${token}`
-    }
+      authorization: `Bearer ${token}`,
+    },
   })
 
   t.strictEqual(response.statusCode, 200)
