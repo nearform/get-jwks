@@ -5,6 +5,7 @@ const LRU = require('lru-cache')
 const jwkToPem = require('jwk-to-pem')
 
 const errors = {
+  NO_JWKS_URI: 'No valid jwks_uri key found in providerConfig',
   NO_JWKS: 'No JWKS found in the response.',
   JWK_NOT_FOUND: 'No matching JWK found in the set.',
   DOMAIN_NOT_ALLOWED: 'The domain is not allowed.',
@@ -14,10 +15,34 @@ function ensureTrailingSlash(domain) {
   return domain.endsWith('/') ? domain : `${domain}/`
 }
 
+async function getJwksUri(normalizedDomain) {
+  const response = await fetch(
+    `${normalizedDomain}.well-known/openid-configuration`,
+    {
+      timeout: 5000,
+    }
+  )
+  const body = await response.json()
+
+  if (!response.ok) {
+    const error = new Error(response.statusText)
+    error.response = response
+    error.body = body
+    throw error
+  }
+
+  if (!body.jwks_uri) {
+    throw new Error(errors.NO_JWKS_URI)
+  }
+
+  return body.jwks_uri
+}
+
 function buildGetJwks(options = {}) {
   const max = options.max || 100
   const maxAge = options.maxAge || 60 * 1000 /* 1 minute */
   const allowedDomains = (options.allowedDomains || []).map(ensureTrailingSlash)
+  const providerDiscovery = options.providerDiscovery || false
 
   const staleCache = new LRU({ max: max * 2, maxAge })
   const cache = new LRU({
@@ -32,6 +57,7 @@ function buildGetJwks(options = {}) {
 
   function getJwk(signature) {
     const { domain, alg, kid } = signature
+
     const normalizedDomain = ensureTrailingSlash(domain)
 
     if (allowedDomains.length && !allowedDomains.includes(normalizedDomain)) {
@@ -65,9 +91,11 @@ function buildGetJwks(options = {}) {
   }
 
   async function retrieveJwk(normalizedDomain, alg, kid) {
-    const response = await fetch(`${normalizedDomain}.well-known/jwks.json`, {
-      timeout: 5000,
-    })
+    const jwksUri = providerDiscovery
+      ? await getJwksUri(normalizedDomain)
+      : `${normalizedDomain}.well-known/jwks.json`
+
+    const response = await fetch(jwksUri, { timeout: 5000 })
     const body = await response.json()
 
     if (!response.ok) {
@@ -93,6 +121,7 @@ function buildGetJwks(options = {}) {
   return {
     getPublicKey,
     getJwk,
+    getJwksUri,
     cache,
     staleCache,
   }

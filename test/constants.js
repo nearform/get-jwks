@@ -35,8 +35,13 @@ const token = jwt.sign({ name: 'Jane Doe' }, privateKey, {
   issuer: domain,
   keyid: jwk.kid,
 })
+const oidcConfig = {
+  issuer: 'https://localhost/',
+  jwks_uri: 'https://localhost/.well-known/certs',
+}
 
 module.exports = {
+  oidcConfig,
   domain,
   token,
   jwks,
