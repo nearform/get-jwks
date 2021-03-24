@@ -14,10 +14,21 @@ function ensureTrailingSlash(domain) {
   return domain.endsWith('/') ? domain : `${domain}/`
 }
 
+async function getJwksUri(normalizedDomain) {
+  return (
+    await (
+      await fetch(`${normalizedDomain}.well-known/openid-configuration`, {
+        timeout: 5000,
+      })
+    ).json()
+  ).jwks_uri
+}
+
 function buildGetJwks(options = {}) {
   const max = options.max || 100
   const maxAge = options.maxAge || 60 * 1000 /* 1 minute */
   const allowedDomains = (options.allowedDomains || []).map(ensureTrailingSlash)
+  const providerDiscovery = options.providerDiscovery || false
 
   const staleCache = new LRU({ max: max * 2, maxAge })
   const cache = new LRU({
@@ -32,6 +43,7 @@ function buildGetJwks(options = {}) {
 
   function getJwk(signature) {
     const { domain, alg, kid } = signature
+
     const normalizedDomain = ensureTrailingSlash(domain)
 
     if (allowedDomains.length && !allowedDomains.includes(normalizedDomain)) {
@@ -65,9 +77,12 @@ function buildGetJwks(options = {}) {
   }
 
   async function retrieveJwk(normalizedDomain, alg, kid) {
-    const response = await fetch(`${normalizedDomain}.well-known/jwks.json`, {
-      timeout: 5000,
-    })
+    const jwksUri = providerDiscovery
+      ? await getJwksUri(normalizedDomain)
+      : `${normalizedDomain}.well-known/jwks.json`
+
+    console.log(jwksUri)
+    const response = await fetch(jwksUri, { timeout: 5000 })
     const body = await response.json()
 
     if (!response.ok) {
