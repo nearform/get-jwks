@@ -5,6 +5,7 @@ const LRU = require('lru-cache')
 const jwkToPem = require('jwk-to-pem')
 
 const errors = {
+  NO_JWKS_URI: 'No valid jwks_uri key found in providerConfig',
   NO_JWKS: 'No JWKS found in the response.',
   JWK_NOT_FOUND: 'No matching JWK found in the set.',
   DOMAIN_NOT_ALLOWED: 'The domain is not allowed.',
@@ -15,13 +16,26 @@ function ensureTrailingSlash(domain) {
 }
 
 async function getJwksUri(normalizedDomain) {
-  return (
-    await (
-      await fetch(`${normalizedDomain}.well-known/openid-configuration`, {
-        timeout: 5000,
-      })
-    ).json()
-  ).jwks_uri
+  const response = await fetch(
+    `${normalizedDomain}.well-known/openid-configuration`,
+    {
+      timeout: 5000,
+    }
+  )
+  const body = await response.json()
+
+  if (!response.ok) {
+    const error = new Error(response.statusText)
+    error.response = response
+    error.body = body
+    throw error
+  }
+
+  if (!body.jwks_uri) {
+    throw new Error(errors.NO_JWKS_URI)
+  }
+
+  return body.jwks_uri
 }
 
 function buildGetJwks(options = {}) {
@@ -81,7 +95,6 @@ function buildGetJwks(options = {}) {
       ? await getJwksUri(normalizedDomain)
       : `${normalizedDomain}.well-known/jwks.json`
 
-    console.log(jwksUri)
     const response = await fetch(jwksUri, { timeout: 5000 })
     const body = await response.json()
 
@@ -108,6 +121,7 @@ function buildGetJwks(options = {}) {
   return {
     getPublicKey,
     getJwk,
+    getJwksUri,
     cache,
     staleCache,
   }
