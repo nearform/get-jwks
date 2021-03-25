@@ -38,12 +38,8 @@ const jwks = {
 }
 const privateKey = readFileSync(path.join(__dirname, 'private.pem'), 'utf8')
 const jwk = jwks.keys[1]
-let defaultSigningAlgorithm;
-if (jwk.alg === undefined && jwk.kty === 'RSA') {
-  defaultSigningAlgorithm = 'RS256';
-}
 const token = jwt.sign({ name: 'Jane Doe' }, privateKey, {
-  algorithm: jwk.alg || defaultSigningAlgorithm,
+  algorithm: jwk.alg,
   issuer: domain,
   keyid: jwk.kid,
 })
