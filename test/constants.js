@@ -52,8 +52,6 @@ const oidcConfig = {
   jwks_uri: 'https://localhost/.well-known/certs',
 }
 
-console.log(jwks)
-
 module.exports = {
   oidcConfig,
   domain,
