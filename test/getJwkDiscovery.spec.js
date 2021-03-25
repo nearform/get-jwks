@@ -54,6 +54,18 @@ t.test('returns a jwk if alg and kid match for discovery', async t => {
   t.deepEqual(jwk, key)
 })
 
+t.test('returns a jwk if no alg is provided and kid match for discovery', async t => {
+  nock(domain).get('/.well-known/openid-configuration').reply(200, oidcConfig)
+  nock(domain).get('/.well-known/certs').reply(200, jwks)
+  const getJwks = buildGetJwks({ providerDiscovery: true })
+  const key = jwks.keys[2]
+
+  const jwk = await getJwks.getJwk({ domain, kid: key.kid })
+
+  t.ok(jwk)
+  t.deepEqual(jwk, key)
+})
+
 t.test('caches a successful response for discovery', async t => {
   nock(domain).get('/.well-known/openid-configuration').reply(200, oidcConfig)
   nock(domain).get('/.well-known/certs').reply(200, jwks)
