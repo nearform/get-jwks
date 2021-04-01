@@ -49,6 +49,17 @@ t.test('returns a jwk if alg and kid match', async t => {
   t.deepEqual(jwk, key)
 })
 
+t.test('returns a jwk if no alg is provided and kid match', async t => {
+  nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
+  const getJwks = buildGetJwks()
+  const key = jwks.keys[2]
+
+  const jwk = await getJwks.getJwk({ domain, kid: key.kid })
+
+  t.ok(jwk)
+  t.deepEqual(jwk, key)
+})
+
 t.test('caches a successful response', async t => {
   nock(domain).get('/.well-known/jwks.json').once().reply(200, jwks)
 

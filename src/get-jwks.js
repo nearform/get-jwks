@@ -109,7 +109,7 @@ function buildGetJwks(options = {}) {
       throw new Error(errors.NO_JWKS)
     }
 
-    const jwk = body.keys.find(key => key.alg === alg && key.kid === kid)
+    const jwk = body.keys.find(key => (key.alg === undefined || key.alg === alg) && key.kid === kid)
 
     if (!jwk) {
       throw new Error(errors.JWK_NOT_FOUND)
