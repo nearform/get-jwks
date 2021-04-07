@@ -32,5 +32,5 @@ t.test('fast-jwt integration tests', async t => {
   const verifyWithPromise = createVerifier({ key: publicKey })
   const payload = await verifyWithPromise(token)
 
-  t.strictEqual(payload.name, 'Jane Doe')
+  t.equal(payload.name, 'Jane Doe')
 })

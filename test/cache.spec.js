@@ -23,7 +23,7 @@ t.test(
     t.ok(publicKey)
     t.ok(jwk)
     t.equal(publicKey, jwkToPem(jwk))
-    t.deepEqual(jwk, localKey)
+    t.same(jwk, localKey)
   }
 )
 

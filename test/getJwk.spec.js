@@ -46,7 +46,7 @@ t.test('returns a jwk if alg and kid match', async t => {
   const jwk = await getJwks.getJwk({ domain, alg: key.alg, kid: key.kid })
 
   t.ok(jwk)
-  t.deepEqual(jwk, key)
+  t.same(jwk, key)
 })
 
 t.test('returns a jwk if no alg is provided and kid match', async t => {
@@ -57,7 +57,7 @@ t.test('returns a jwk if no alg is provided and kid match', async t => {
   const jwk = await getJwks.getJwk({ domain, kid: key.kid })
 
   t.ok(jwk)
-  t.deepEqual(jwk, key)
+  t.same(jwk, key)
 })
 
 t.test('caches a successful response', async t => {
@@ -71,7 +71,7 @@ t.test('caches a successful response', async t => {
   const jwk = await getJwks.getJwk({ domain, alg, kid })
 
   t.ok(jwk)
-  t.deepEqual(jwk, key)
+  t.same(jwk, key)
 })
 
 t.test('does not cache a failed response', async t => {
@@ -159,7 +159,7 @@ t.test('returns a stale cached value if request fails', async t => {
     kid: key1.kid,
   })
 
-  t.sameStrict(key, key1)
+  t.strictSame(key, key1)
 })
 
 t.test('allowed domains', async t => {
