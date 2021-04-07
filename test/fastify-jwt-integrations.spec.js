@@ -52,9 +52,8 @@ t.test('fastify-jwt integration tests', async t => {
     },
   })
 
-  t.strictEqual(response.statusCode, 200)
-  t.strictEqual(response.body, 'Jane Doe')
-  t.done()
+  t.equal(response.statusCode, 200)
+  t.equal(response.body, 'Jane Doe')
 })
 
 t.test('fastify-jwt integration tests with providerDiscovery', async t => {
@@ -95,7 +94,6 @@ t.test('fastify-jwt integration tests with providerDiscovery', async t => {
     },
   })
 
-  t.strictEqual(response.statusCode, 200)
-  t.strictEqual(response.body, 'Jane Doe')
-  t.done()
+  t.equal(response.statusCode, 200)
+  t.equal(response.body, 'Jane Doe')
 })
