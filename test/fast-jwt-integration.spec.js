@@ -33,5 +33,4 @@ t.test('fast-jwt integration tests', async t => {
   const payload = await verifyWithPromise(token)
 
   t.strictEqual(payload.name, 'Jane Doe')
-  t.done()
 })

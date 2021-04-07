@@ -27,7 +27,8 @@
   "dependencies": {
     "jwk-to-pem": "^2.0.4",
     "lru-cache": "^6.0.0",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "tap": "^15.0.2"
   },
   "devDependencies": {
     "eslint": "^7.22.0",
@@ -37,7 +38,6 @@
     "jsonwebtoken": "^8.5.1",
     "nock": "^13.0.7",
     "prettier": "^2.2.1",
-    "sinon": "^10.0.0",
-    "tap": "^14.11.0"
+    "sinon": "^10.0.0"
   }
 }
