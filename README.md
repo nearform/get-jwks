@@ -113,29 +113,26 @@ fastify.listen(3000)
 The following example shows how to use JWKS in fast-jwt via get-jwks.
 
 ```js
-const { createDecoder, createVerifier } = require('fast-jwt')
+const { createVerifier } = require('fast-jwt')
 const buildGetJwks = require('get-jwks')
-
-// JWT signed with JWKS
-const token = '...'
 
 // well known url of the token issuer
 // often encoded as the `iss` property of the token payload
 const domain = 'https://...'
 
-// complete is necessary to get the header
-const decode = createDecoder({ complete: true })
+const getJwks = buildGetJwks({ allowedDomains: [...]})
 
-// decode the token and extract the header
-const {
-  header: { kid, alg },
-} = decode(token)
+// create a verifier function with key as a function
+const verifyWithPromise = createVerifier({
+  key: async function (token) {
+    const publicKey = await getJwks.getPublicKey({
+      kid: token.kid,
+      alg: token.alg,
+      domain,
+    })
+    return publicKey
+  },
+})
 
-const getJwks = buildGetJwks()
-const publicKey = await getJwks.getPublicKey({ kid, domain, alg })
-
-const verifyWithPromise = createVerifier({ key: publicKey })
-
-// verify the token via the public key
 const payload = await verifyWithPromise(token)
 ```
