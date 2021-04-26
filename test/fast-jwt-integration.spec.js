@@ -2,7 +2,7 @@
 
 const t = require('tap')
 const nock = require('nock')
-const { createDecoder, createVerifier } = require('fast-jwt')
+const { createVerifier } = require('fast-jwt')
 
 const { jwks, token } = require('./constants')
 const buildGetJwks = require('../src/get-jwks')
