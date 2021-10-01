@@ -7,7 +7,7 @@
     "node": ">=10"
   },
   "scripts": {
-    "test": "tap",
+    "test": "tap test/*.spec.js",
     "lint": "eslint ."
   },
   "repository": {
