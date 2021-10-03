@@ -29,6 +29,7 @@ const getJwks = buildGetJwks({
 - `maxAge`: Milliseconds an item will remain in cache. Defaults to 60s.
 - `allowedDomains`: Array of allowed domains. By default all domains are allowed.
 - `providerDiscovery`: Indicates if the Provider Configuration Information is used to automatically get the jwks_uri from the [OpenID Provider Discovery Endpoint](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig). This endpoint is exposing the [Provider Metadata](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata). With this flag set to true the domain will be treated as the OpenID Issuer which is the iss property in the token. Defaults to false
+- `specifyJwksPath`: Specify a relative path to the jwks_uri. Example `/otherdir/jwks.json`. Optional.
 
 > `max` and `maxAge` are provided to [lru-cache](https://www.npmjs.com/package/lru-cache).
 
@@ -40,7 +41,7 @@ const buildGetJwks = require('get-jwks')
 const getJwks = buildGetJwks()
 
 const jwk = await getJwks.getJwk({
-  domain: 'https://exampe.com/',
+  domain: 'https://example.com/',
   alg: 'token_alg',
   kid: 'token_kid',
 })
