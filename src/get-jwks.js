@@ -50,13 +50,37 @@ function buildGetJwks(options = {}) {
   const specifyJwksPath = options.specifyJwksPath
     ? ensureNoLeadingSlash(options.specifyJwksPath)
     : false
-
+  const agent = options.agent || null
   const staleCache = new LRU({ max: max * 2, maxAge })
   const cache = new LRU({
     max,
     maxAge,
     dispose: staleCache.set.bind(staleCache),
   })
+
+  async function getJwksUri(normalizedDomain) {
+    const response = await fetch(
+      `${normalizedDomain}.well-known/openid-configuration`,
+      {
+        agent,
+        timeout: 5000,        
+      }
+    )
+    const body = await response.json()
+  
+    if (!response.ok) {
+      const error = new Error(response.statusText)
+      error.response = response
+      error.body = body
+      throw error
+    }
+  
+    if (!body.jwks_uri) {
+      throw new Error(errors.NO_JWKS_URI)
+    }
+  
+    return body.jwks_uri
+  }
 
   async function getPublicKey(signature) {
     return jwkToPem(await this.getJwk(signature))
@@ -104,7 +128,7 @@ function buildGetJwks(options = {}) {
       ? await getJwksUri(normalizedDomain)
       : `${normalizedDomain}.well-known/jwks.json`
 
-    const response = await fetch(jwksUri, { timeout: 5000 })
+    const response = await fetch(jwksUri, { agent, timeout: 5000 })
     const body = await response.json()
 
     if (!response.ok) {
