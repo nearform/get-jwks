@@ -49,6 +49,21 @@ t.test('returns a jwk if alg and kid match', async t => {
   t.same(jwk, key)
 })
 
+t.test('returns a jwk if alg and kid match and path is specified', async t => {
+  nock(domain).get('/otherdir/jwks.json').reply(200, jwks)
+  const getJwks = buildGetJwks({ jwksPath: '/otherdir/jwks.json' })
+  const key = jwks.keys[0]
+
+  const jwk = await getJwks.getJwk({
+    domain,
+    alg: key.alg,
+    kid: key.kid,
+  })
+
+  t.ok(jwk)
+  t.same(jwk, key)
+})
+
 t.test('returns a jwk if no alg is provided and kid match', async t => {
   nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
@@ -110,6 +125,15 @@ t.test('rejects if no JWKS are found in the response', async t => {
 t.test('supports domain without trailing slash', async t => {
   nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
+  const [{ alg, kid }] = jwks.keys
+
+  const key = await getJwks.getJwk({ domain: 'https://localhost', alg, kid })
+  t.ok(key)
+})
+
+t.test('supports path without leading slash', async t => {
+  nock(domain).get('/otherdir/jwks.json').reply(200, jwks)
+  const getJwks = buildGetJwks({ jwksPath: 'otherdir/jwks.json' })
   const [{ alg, kid }] = jwks.keys
 
   const key = await getJwks.getJwk({ domain: 'https://localhost', alg, kid })

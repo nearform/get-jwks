@@ -15,13 +15,19 @@ function ensureTrailingSlash(domain) {
   return domain.endsWith('/') ? domain : `${domain}/`
 }
 
+function ensureNoLeadingSlash(path) {
+  return path.startsWith('/') ? path.substring(1) : path
+}
+
 function buildGetJwks(options = {}) {
   const max = options.max || 100
   const maxAge = options.maxAge || 60 * 1000 /* 1 minute */
   const allowedDomains = (options.allowedDomains || []).map(ensureTrailingSlash)
   const providerDiscovery = options.providerDiscovery || false
+  const jwksPath = options.jwksPath
+    ? ensureNoLeadingSlash(options.jwksPath)
+    : false
   const agent = options.agent || null
-  
   const staleCache = new LRU({ max: max * 2, maxAge })
   const cache = new LRU({
     max,
@@ -34,22 +40,22 @@ function buildGetJwks(options = {}) {
       `${normalizedDomain}.well-known/openid-configuration`,
       {
         agent,
-        timeout: 5000,        
+        timeout: 5000,
       }
     )
     const body = await response.json()
-  
+
     if (!response.ok) {
       const error = new Error(response.statusText)
       error.response = response
       error.body = body
       throw error
     }
-  
+
     if (!body.jwks_uri) {
       throw new Error(errors.NO_JWKS_URI)
     }
-  
+
     return body.jwks_uri
   }
 
@@ -93,7 +99,9 @@ function buildGetJwks(options = {}) {
   }
 
   async function retrieveJwk(normalizedDomain, alg, kid) {
-    const jwksUri = providerDiscovery
+    const jwksUri = jwksPath
+      ? normalizedDomain + jwksPath
+      : providerDiscovery
       ? await getJwksUri(normalizedDomain)
       : `${normalizedDomain}.well-known/jwks.json`
 
@@ -111,7 +119,9 @@ function buildGetJwks(options = {}) {
       throw new Error(errors.NO_JWKS)
     }
 
-    const jwk = body.keys.find(key => (key.alg === undefined || key.alg === alg) && key.kid === kid)
+    const jwk = body.keys.find(
+      key => (key.alg === undefined || key.alg === alg) && key.kid === kid
+    )
 
     if (!jwk) {
       throw new Error(errors.JWK_NOT_FOUND)
