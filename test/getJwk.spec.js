@@ -51,7 +51,7 @@ t.test('returns a jwk if alg and kid match', async t => {
 
 t.test('returns a jwk if alg and kid match and path is specified', async t => {
   nock(domain).get('/otherdir/jwks.json').reply(200, jwks)
-  const getJwks = buildGetJwks({ specifyJwksPath: '/otherdir/jwks.json' })
+  const getJwks = buildGetJwks({ jwksPath: '/otherdir/jwks.json' })
   const key = jwks.keys[0]
 
   const jwk = await getJwks.getJwk({
