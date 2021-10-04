@@ -19,29 +19,6 @@ function ensureNoLeadingSlash(path) {
   return path.startsWith('/') ? path.substring(1) : path
 }
 
-async function getJwksUri(normalizedDomain) {
-  const response = await fetch(
-    `${normalizedDomain}.well-known/openid-configuration`,
-    {
-      timeout: 5000,
-    }
-  )
-  const body = await response.json()
-
-  if (!response.ok) {
-    const error = new Error(response.statusText)
-    error.response = response
-    error.body = body
-    throw error
-  }
-
-  if (!body.jwks_uri) {
-    throw new Error(errors.NO_JWKS_URI)
-  }
-
-  return body.jwks_uri
-}
-
 function buildGetJwks(options = {}) {
   const max = options.max || 100
   const maxAge = options.maxAge || 60 * 1000 /* 1 minute */
