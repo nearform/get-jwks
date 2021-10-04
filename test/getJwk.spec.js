@@ -131,6 +131,15 @@ t.test('supports domain without trailing slash', async t => {
   t.ok(key)
 })
 
+t.test('supports path without leading slash', async t => {
+  nock(domain).get('/otherdir/jwks.json').reply(200, jwks)
+  const getJwks = buildGetJwks({ jwksPath: 'otherdir/jwks.json' })
+  const [{ alg, kid }] = jwks.keys
+
+  const key = await getJwks.getJwk({ domain: 'https://localhost', alg, kid })
+  t.ok(key)
+})
+
 t.test('does not execute concurrent requests', () => {
   nock(domain).get('/.well-known/jwks.json').once().reply(200, jwks)
 
