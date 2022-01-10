@@ -3,6 +3,7 @@
   "version": "5.0.0",
   "description": "Fetch utils for JWKS keys",
   "main": "src/get-jwks.js",
+  "types": "./src/get-jwks.d.ts",
   "engines": {
     "node": ">=12"
   },
