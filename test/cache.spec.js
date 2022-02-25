@@ -41,6 +41,6 @@ t.test(
     t.ok(jwk)
     t.ok(getJwks.cache)
     t.equal(cache.max, 100)
-    t.equal(cache.maxAge, 60000)
+    t.equal(cache.ttl, 60000)
   }
 )

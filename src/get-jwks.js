@@ -21,18 +21,18 @@ function ensureNoLeadingSlash(path) {
 
 function buildGetJwks(options = {}) {
   const max = options.max || 100
-  const maxAge = options.maxAge || 60 * 1000 /* 1 minute */
+  const ttl = options.ttl || 60 * 1000 /* 1 minute */
   const allowedDomains = (options.allowedDomains || []).map(ensureTrailingSlash)
   const providerDiscovery = options.providerDiscovery || false
   const jwksPath = options.jwksPath
     ? ensureNoLeadingSlash(options.jwksPath)
     : false
   const agent = options.agent || null
-  const staleCache = new LRU({ max: max * 2, maxAge })
+  const staleCache = new LRU({ max: max * 2, ttl })
   const cache = new LRU({
     max,
-    maxAge,
-    dispose: staleCache.set.bind(staleCache),
+    ttl,
+    dispose: (value, key) => staleCache.set(key, value),
   })
 
   async function getJwksUri(normalizedDomain) {
@@ -83,7 +83,7 @@ function buildGetJwks(options = {}) {
       async err => {
         const stale = staleCache.get(cacheKey)
 
-        cache.del(cacheKey)
+        cache.delete(cacheKey)
 
         if (stale) {
           return stale

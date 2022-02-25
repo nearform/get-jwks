@@ -11,7 +11,7 @@ type GetPublicKeyOptions = {
 
 type GetJwksOptions = {
   max?: number
-  maxAge?: number
+  ttl?: number
   allowedDomains?: string[]
   providerDiscovery?: boolean
   jwksPath?: string
