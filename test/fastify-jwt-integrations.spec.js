@@ -3,7 +3,7 @@
 const t = require('tap')
 const nock = require('nock')
 const Fastify = require('fastify')
-const fjwt = require('fastify-jwt')
+const fjwt = require('@fastify/jwt')
 
 const { oidcConfig, jwks, token, domain } = require('./constants')
 const buildGetJwks = require('../src/get-jwks')
@@ -17,7 +17,7 @@ t.afterEach(async () => {
   nock.enableNetConnect()
 })
 
-t.test('fastify-jwt integration tests', async t => {
+t.test('@fastify/jwt integration tests', async t => {
   nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
 
   const fastify = Fastify()
@@ -56,7 +56,7 @@ t.test('fastify-jwt integration tests', async t => {
   t.equal(response.body, 'Jane Doe')
 })
 
-t.test('fastify-jwt integration tests with providerDiscovery', async t => {
+t.test('@fastify/jwt integration tests with providerDiscovery', async t => {
   nock(domain)
     .get('/.well-known/openid-configuration')
     .once()
