@@ -1,4 +1,5 @@
 import LRU from 'lru-cache'
+import type { Agent } from 'https'
 
 type JWKSignature = { domain: string; alg: string; kid: string }
 type JWK = { [key: string]: any; domain: string; alg: string; kid: string }
@@ -15,7 +16,7 @@ type GetJwksOptions = {
   allowedDomains?: string[]
   providerDiscovery?: boolean
   jwksPath?: string
-  agent?: string
+  agent?: Agent
 }
 
 type GetJwks = {
