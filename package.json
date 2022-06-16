@@ -5,7 +5,7 @@
   "main": "src/get-jwks.js",
   "types": "./src/get-jwks.d.ts",
   "engines": {
-    "node": ">=12"
+    "node": ">=14"
   },
   "tsd": {
     "directory": "./test/types"
