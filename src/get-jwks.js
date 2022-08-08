@@ -120,7 +120,7 @@ function buildGetJwks(options = {}) {
     }
 
     const jwk = body.keys.find(
-      key => (key.alg === undefined || key.alg === alg) && key.kid === kid
+      key => (alg === undefined || key.alg === undefined || key.alg === alg) && key.kid === kid
     )
 
     if (!jwk) {
