@@ -75,6 +75,17 @@ t.test('returns a jwk if no alg is provided and kid match', async t => {
   t.same(jwk, key)
 })
 
+t.test('returns a jwk if no alg is provided and kid match but jwk has alg', async t => {
+  nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
+  const getJwks = buildGetJwks()
+  const key = jwks.keys[1]
+
+  const jwk = await getJwks.getJwk({ domain, kid: key.kid })
+
+  t.ok(jwk)
+  t.same(jwk, key)
+})
+
 t.test('caches a successful response', async t => {
   nock(domain).get('/.well-known/jwks.json').once().reply(200, jwks)
 

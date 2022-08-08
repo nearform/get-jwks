@@ -66,6 +66,18 @@ t.test('returns a jwk if no alg is provided and kid match for discovery', async 
   t.same(jwk, key)
 })
 
+t.test('returns a jwk if no alg is provided and kid match for discovery but jwk has alg', async t => {
+  nock(domain).get('/.well-known/openid-configuration').reply(200, oidcConfig)
+  nock(domain).get('/.well-known/certs').reply(200, jwks)
+  const getJwks = buildGetJwks({ providerDiscovery: true })
+  const key = jwks.keys[1]
+
+  const jwk = await getJwks.getJwk({ domain, kid: key.kid })
+
+  t.ok(jwk)
+  t.same(jwk, key)
+})
+
 t.test('caches a successful response for discovery', async t => {
   nock(domain).get('/.well-known/openid-configuration').reply(200, oidcConfig)
   nock(domain).get('/.well-known/certs').reply(200, jwks)
