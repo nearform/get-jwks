@@ -5,6 +5,7 @@ const t = require('tap')
 
 const { jwks, domain } = require('./constants')
 const buildGetJwks = require('../src/get-jwks')
+const { GetJwksError, errorCode } = require('../src/error')
 
 t.beforeEach(async () => {
   nock.disableNetConnect()
@@ -21,8 +22,11 @@ t.test('rejects if the request fails', async t => {
   const [{ alg, kid }] = jwks.keys
   const getJwks = buildGetJwks()
 
-  const expectedError = new Error('Internal Server Error')
-  expectedError.body = { msg: 'boom' }
+  const expectedError = {
+    name: GetJwksError.name,
+    code: errorCode.JWKS_REQUEST_FAILED,
+    body: { msg: 'boom' },
+  }
 
   await t.rejects(getJwks.getJwk({ domain, alg, kid }), expectedError)
 })
