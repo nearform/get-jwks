@@ -6,6 +6,7 @@ const nock = require('nock')
 const { domain } = require('./constants')
 
 const buildGetJwks = require('../src/get-jwks')
+const { GetJwksError, errorCode } = require('../src/error')
 
 t.beforeEach(async () => {
   nock.disableNetConnect()
@@ -22,7 +23,11 @@ t.test('throw error if the discovery request fails', async t => {
     .reply(500, { msg: 'baam' })
   const getJwks = buildGetJwks({ providerDiscovery: true })
 
-  const expectedError = new Error('Internal Server Error')
+  const expectedError = {
+    name: GetJwksError.name,
+    code: errorCode.OPENID_CONFIGURATION_REQUEST_FAILED,
+    body: { msg: 'baam' },
+  }
 
   await t.rejects(getJwks.getJwksUri(domain), expectedError)
 })
@@ -35,9 +40,10 @@ t.test(
       .reply(200, { msg: 'baam' })
     const getJwks = buildGetJwks({ providerDiscovery: true })
 
-    const expectedError = new Error(
-      'No valid jwks_uri key found in providerConfig'
-    )
+    const expectedError = {
+      name: GetJwksError.name,
+      code: errorCode.NO_JWKS_URI,
+    }
 
     await t.rejects(getJwks.getJwksUri(domain), expectedError)
   }

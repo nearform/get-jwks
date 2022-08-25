@@ -4,12 +4,7 @@ const fetch = require('node-fetch')
 const LRU = require('lru-cache')
 const jwkToPem = require('jwk-to-pem')
 
-const errors = {
-  NO_JWKS_URI: 'No valid jwks_uri key found in providerConfig',
-  NO_JWKS: 'No JWKS found in the response.',
-  JWK_NOT_FOUND: 'No matching JWK found in the set.',
-  DOMAIN_NOT_ALLOWED: 'The domain is not allowed.',
-}
+const { errorCode, GetJwksError } = require('./error')
 
 function ensureTrailingSlash(domain) {
   return domain.endsWith('/') ? domain : `${domain}/`
@@ -46,14 +41,14 @@ function buildGetJwks(options = {}) {
     const body = await response.json()
 
     if (!response.ok) {
-      const error = new Error(response.statusText)
-      error.response = response
-      error.body = body
-      throw error
+      throw new GetJwksError(errorCode.OPENID_CONFIGURATION_REQUEST_FAILED, {
+        response,
+        body,
+      })
     }
 
     if (!body.jwks_uri) {
-      throw new Error(errors.NO_JWKS_URI)
+      throw new GetJwksError(errorCode.NO_JWKS_URI)
     }
 
     return body.jwks_uri
@@ -69,7 +64,8 @@ function buildGetJwks(options = {}) {
     const normalizedDomain = ensureTrailingSlash(domain)
 
     if (allowedDomains.length && !allowedDomains.includes(normalizedDomain)) {
-      return Promise.reject(new Error(errors.DOMAIN_NOT_ALLOWED))
+      const error = new GetJwksError(errorCode.DOMAIN_NOT_ALLOWED)
+      return Promise.reject(error)
     }
 
     const cacheKey = `${alg}:${kid}:${normalizedDomain}`
@@ -109,14 +105,14 @@ function buildGetJwks(options = {}) {
     const body = await response.json()
 
     if (!response.ok) {
-      const error = new Error(response.statusText)
-      error.response = response
-      error.body = body
-      throw error
+      throw new GetJwksError(errorCode.JWKS_REQUEST_FAILED, {
+        response,
+        body,
+      })
     }
 
     if (!body.keys || body.keys.length === 0) {
-      throw new Error(errors.NO_JWKS)
+      throw new GetJwksError(errorCode.NO_JWKS)
     }
 
     const jwk = body.keys.find(
@@ -126,7 +122,7 @@ function buildGetJwks(options = {}) {
     )
 
     if (!jwk) {
-      throw new Error(errors.JWK_NOT_FOUND)
+      throw new GetJwksError(errorCode.JWK_NOT_FOUND)
     }
 
     return jwk

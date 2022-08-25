@@ -5,6 +5,7 @@ const t = require('tap')
 
 const { oidcConfig, jwks, domain } = require('./constants')
 const buildGetJwks = require('../src/get-jwks')
+const { errorCode, GetJwksError } = require('../src/error')
 
 t.beforeEach(async () => {
   nock.disableNetConnect()
@@ -23,9 +24,11 @@ t.test('rejects if the discovery request fails', async t => {
   const [{ alg, kid }] = jwks.keys
   const getJwks = buildGetJwks({ providerDiscovery: true })
 
-  const expectedError = new Error('Internal Server Error')
-  expectedError.body = { msg: 'baam' }
-
+  const expectedError = {
+    name: GetJwksError.name,
+    code: errorCode.OPENID_CONFIGURATION_REQUEST_FAILED,
+    body: { msg: 'baam' },
+  }
   await t.rejects(getJwks.getJwk({ domain, alg, kid }), expectedError)
 })
 
@@ -36,7 +39,11 @@ t.test('rejects if the request fails', async t => {
   const [{ alg, kid }] = jwks.keys
   const getJwks = buildGetJwks({ providerDiscovery: true })
 
-  const expectedError = new Error('Internal Server Error')
+  const expectedError = {
+    name: GetJwksError.name,
+    code: errorCode.JWKS_REQUEST_FAILED,
+    body: { msg: 'boom' },
+  }
   expectedError.body = { msg: 'boom' }
 
   await t.rejects(getJwks.getJwk({ domain, alg, kid }), expectedError)
