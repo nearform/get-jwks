@@ -40,7 +40,7 @@
     "eslint": "^8.6.0",
     "fast-jwt": "^2.0.0",
     "fastify": "^4.0.3",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "nock": "^13.0.7",
     "prettier": "^2.2.1",
     "sinon": "^15.0.0",
