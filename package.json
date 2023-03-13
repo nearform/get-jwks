@@ -30,7 +30,7 @@
   "homepage": "https://github.com/nearform/get-jwks#readme",
   "dependencies": {
     "jwk-to-pem": "^2.0.4",
-    "lru-cache": "^7.4.0",
+    "lru-cache": "^8.0.0",
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {
