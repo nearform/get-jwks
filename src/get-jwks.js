@@ -1,7 +1,7 @@
 'use strict'
 
 const fetch = require('node-fetch')
-const LRU = require('lru-cache')
+const { LRUCache } = require('lru-cache')
 const jwkToPem = require('jwk-to-pem')
 
 const { errorCode, GetJwksError } = require('./error')
@@ -23,8 +23,8 @@ function buildGetJwks(options = {}) {
     ? ensureNoLeadingSlash(options.jwksPath)
     : false
   const agent = options.agent || null
-  const staleCache = new LRU({ max: max * 2, ttl })
-  const cache = new LRU({
+  const staleCache = new LRUCache({ max: max * 2, ttl })
+  const cache = new LRUCache({
     max,
     ttl,
     dispose: (value, key) => staleCache.set(key, value),
