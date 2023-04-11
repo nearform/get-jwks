@@ -1,4 +1,4 @@
-import LRU from 'lru-cache'
+import type { LRUCache } from 'lru-cache'
 import type { Agent } from 'https'
 
 type JWKSignature = { domain: string; alg: string; kid: string }
@@ -23,8 +23,8 @@ type GetJwks = {
   getPublicKey: (options?: GetPublicKeyOptions) => Promise<string>
   getJwk: (signature: JWKSignature) => Promise<JWK>
   getJwksUri: (normalizedDomain: string) => Promise<string>
-  cache: LRU<string, JWK>
-  staleCache: LRU<string, JWK>
+  cache: LRUCache<string, JWK>
+  staleCache: LRUCache<string, JWK>
 }
 
 export default function buildGetJwks(options?: GetJwksOptions): GetJwks
