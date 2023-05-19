@@ -22,10 +22,10 @@ t.test('fast-jwt integration tests', async t => {
 
   const getJwks = buildGetJwks()
   const verifyWithPromise = createVerifier({
-    key: async function (token) {
+    key: async function ({ header }) {
       const publicKey = await getJwks.getPublicKey({
-        kid: token.kid,
-        alg: token.alg,
+        kid: header.kid,
+        alg: header.alg,
         domain,
       })
       return publicKey

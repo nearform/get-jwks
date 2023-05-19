@@ -130,10 +130,10 @@ const getJwks = buildGetJwks({ allowedDomains: [...]})
 
 // create a verifier function with key as a function
 const verifyWithPromise = createVerifier({
-  key: async function (token) {
+  key: async function ({ header }) {
     const publicKey = await getJwks.getPublicKey({
-      kid: token.kid,
-      alg: token.alg,
+      kid: header.kid,
+      alg: header.alg,
       domain,
     })
     return publicKey
