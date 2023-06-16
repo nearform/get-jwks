@@ -4,6 +4,9 @@
   "description": "Fetch utils for JWKS keys",
   "main": "src/get-jwks.js",
   "types": "./src/get-jwks.d.ts",
+  "files": [
+    "src"
+  ],
   "engines": {
     "node": ">=14"
   },
