@@ -274,7 +274,7 @@ t.test('allowed domains', async t => {
   })
 })
 
-t.only('timeout', async t => {
+t.test('timeout', async t => {
   const domain = 'https://example.com'
   const [{ alg, kid }] = jwks.keys
 
