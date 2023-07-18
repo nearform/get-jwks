@@ -38,7 +38,7 @@ t.test('rejects if alg and kid do not match', async t => {
 
   await t.rejects(
     getJwks.getJwk({ domain, alg: 'NOT', kid: 'FOUND' }),
-    'No matching JWK found in the set.'
+    'No matching JWK found in the set.',
   )
 })
 
@@ -90,7 +90,7 @@ t.test(
 
     t.ok(jwk)
     t.same(jwk, key)
-  }
+  },
 )
 
 t.test('caches a successful response', async t => {
@@ -125,7 +125,7 @@ t.test('rejects if response is an empty object', async t => {
 
   return t.rejects(
     getJwks.getJwk({ domain, alg, kid }),
-    'No JWKS found in the response.'
+    'No JWKS found in the response.',
   )
 })
 
@@ -136,7 +136,7 @@ t.test('rejects if no JWKS are found in the response', async t => {
 
   return t.rejects(
     getJwks.getJwk({ domain, alg, kid }),
-    'No JWKS found in the response.'
+    'No JWKS found in the response.',
   )
 })
 
@@ -241,7 +241,7 @@ t.test('allowed domains', async t => {
         const [{ alg, kid }] = jwks.keys
 
         t.ok(await getJwks.getJwk({ domain: domainFromToken, alg, kid }))
-      }
+      },
     )
   })
 
@@ -269,7 +269,36 @@ t.test('allowed domains', async t => {
 
     return t.rejects(
       getJwks.getJwk({ domain, alg, kid }),
-      'The domain is not allowed.'
+      'The domain is not allowed.',
     )
+  })
+})
+
+t.only('timeout', async t => {
+  const domain = 'https://example.com'
+  const [{ alg, kid }] = jwks.keys
+
+  t.beforeEach(() =>
+    nock(domain).get('/.well-known/jwks.json').reply(200, jwks),
+  )
+
+  let timeout
+  const buildGetJwks = t.mock('../src/get-jwks', {
+    'node-fetch': (init, options) => {
+      timeout = options.timeout
+      return require('node-fetch')(init, options)
+    },
+  })
+
+  t.test('timeout defaults to 5 seconds', async t => {
+    const getJwks = buildGetJwks()
+    await getJwks.getJwk({ domain, alg, kid })
+    t.equal(timeout, 5000)
+  })
+
+  t.test('ensures that timeout is set to 10 seconds', async t => {
+    const getJwks = buildGetJwks({ timeout: 10000 })
+    await getJwks.getJwk({ domain, alg, kid })
+    t.equal(timeout, 10000)
   })
 })
