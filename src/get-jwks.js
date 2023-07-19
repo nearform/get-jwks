@@ -17,6 +17,7 @@ function ensureNoLeadingSlash(path) {
 function buildGetJwks(options = {}) {
   const max = options.max || 100
   const ttl = options.ttl || 60 * 1000 /* 1 minute */
+  const timeout = options.timeout || 5 * 1000 /* 5 seconds */
   const allowedDomains = (options.allowedDomains || []).map(ensureTrailingSlash)
   const providerDiscovery = options.providerDiscovery || false
   const jwksPath = options.jwksPath
@@ -35,7 +36,7 @@ function buildGetJwks(options = {}) {
       `${normalizedDomain}.well-known/openid-configuration`,
       {
         agent,
-        timeout: 5000,
+        timeout,
       }
     )
     const body = await response.json()
@@ -101,7 +102,7 @@ function buildGetJwks(options = {}) {
       ? await getJwksUri(normalizedDomain)
       : `${normalizedDomain}.well-known/jwks.json`
 
-    const response = await fetch(jwksUri, { agent, timeout: 5000 })
+    const response = await fetch(jwksUri, { agent, timeout })
     const body = await response.json()
 
     if (!response.ok) {

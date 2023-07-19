@@ -17,6 +17,7 @@ type GetJwksOptions = {
   providerDiscovery?: boolean
   jwksPath?: string
   agent?: Agent
+  timeout?: number
 }
 
 type GetJwks = {
