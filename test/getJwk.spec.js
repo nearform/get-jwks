@@ -260,6 +260,41 @@ t.test('allowed domains', async t => {
     t.ok(await getJwks.getJwk({ domain: domain2, alg, kid }))
   })
 
+  t.test('checks token issuer', async t => {
+    const domain = 'https://example.com/realms/REALM_NAME'
+
+    nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
+
+    const getJwks = buildGetJwks({
+      checkIssuer: (issuer) => {
+        const url = new URL(issuer)
+        const baseUrl = `${url.protocol}//${url.hostname}/`
+        return baseUrl === 'https://example.com/'
+      }
+    })
+
+    const [{ alg, kid }] = jwks.keys
+
+    t.ok(await getJwks.getJwk({ domain, alg, kid }))
+  })
+
+  t.test('forbids invalid issuer', async t => {
+    const getJwks = buildGetJwks({
+      checkIssuer: (issuer) => {
+        const url = new URL(issuer)
+        const baseUrl = `${url.protocol}//${url.hostname}/`
+        return baseUrl === 'https://example.com/'
+      }
+    })
+
+    const [{ alg, kid }] = jwks.keys
+
+    return t.rejects(
+      getJwks.getJwk({ domain, alg, kid }),
+      'Issuer is not allowed.',
+    )
+  })
+
   t.test('forbids domain outside of the allow list', async t => {
     const getJwks = buildGetJwks({
       allowedDomains: ['https://example.com/'],
