@@ -23,8 +23,8 @@ const getJwks = buildGetJwks({
   ttl: 60 * 1000,
   timeout: 5000,
   allowedDomains: ['https://example.com'],
-  checkIssuer: (domain) => {
-    return domain === 'https://example.com'
+  checkIssuer: (issuer) => {
+    return issuer === 'https://example.com'
   },
   providerDiscovery: false,
   agent: new https.Agent({
