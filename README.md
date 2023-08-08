@@ -23,6 +23,9 @@ const getJwks = buildGetJwks({
   ttl: 60 * 1000,
   timeout: 5000,
   allowedDomains: ['https://example.com'],
+  checkIssuer: (domain) => {
+    return domain === 'https://example.com'
+  },
   providerDiscovery: false,
   agent: new https.Agent({
     keepAlive: true,
@@ -34,6 +37,7 @@ const getJwks = buildGetJwks({
 - `ttl`: Milliseconds an item will remain in cache. Defaults to 60s.
 - `timeout`: Specifies how long it should wait to retrieve a JWK before it fails. The time is set in milliseconds. Defaults to 5s.
 - `allowedDomains`: Array of allowed domains. By default all domains are allowed.
+-  `checkIssuer`: Optional user defined function to validate a token's domain
 - `providerDiscovery`: Indicates if the Provider Configuration Information is used to automatically get the jwks_uri from the [OpenID Provider Discovery Endpoint](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig). This endpoint is exposing the [Provider Metadata](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata). With this flag set to true the domain will be treated as the OpenID Issuer which is the iss property in the token. Defaults to false. Ignored if jwksPath is specified.
 - `jwksPath`: Specify a relative path to the jwks_uri. Example `/otherdir/jwks.json`. Takes precedence over providerDiscovery. Optional.
 - `agent`: The custom agent to use for requests, as specified in [node-fetch documentation](https://github.com/node-fetch/node-fetch#custom-agent). Defaults to `null`.
