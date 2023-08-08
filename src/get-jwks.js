@@ -19,6 +19,7 @@ function buildGetJwks(options = {}) {
   const ttl = options.ttl || 60 * 1000 /* 1 minute */
   const timeout = options.timeout || 5 * 1000 /* 5 seconds */
   const allowedDomains = (options.allowedDomains || []).map(ensureTrailingSlash)
+  const checkIssuer = options.checkIssuer
   const providerDiscovery = options.providerDiscovery || false
   const jwksPath = options.jwksPath
     ? ensureNoLeadingSlash(options.jwksPath)
@@ -65,6 +66,11 @@ function buildGetJwks(options = {}) {
     const normalizedDomain = ensureTrailingSlash(domain)
 
     if (allowedDomains.length && !allowedDomains.includes(normalizedDomain)) {
+      const error = new GetJwksError(errorCode.DOMAIN_NOT_ALLOWED)
+      return Promise.reject(error)
+    }
+
+    if (checkIssuer && !checkIssuer(normalizedDomain)) {
       const error = new GetJwksError(errorCode.DOMAIN_NOT_ALLOWED)
       return Promise.reject(error)
     }
