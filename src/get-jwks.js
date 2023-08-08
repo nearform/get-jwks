@@ -63,10 +63,8 @@ function buildGetJwks(options = {}) {
     const { domain, alg, kid } = signature
 
     const normalizedDomain = ensureTrailingSlash(domain)
-    const url = new URL(normalizedDomain)
-    const baseUrl = `${url.protocol}//${url.hostname}/`
 
-    if (allowedDomains.length && !allowedDomains.includes(baseUrl)) {
+    if (allowedDomains.length && !allowedDomains.includes(normalizedDomain)) {
       const error = new GetJwksError(errorCode.DOMAIN_NOT_ALLOWED)
       return Promise.reject(error)
     }
