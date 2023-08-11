@@ -244,23 +244,23 @@ t.test('allowed domains for discovery', async t => {
     ['https://example.com/', 'https://example.com'],
   ]
 
-  allowedCombinations.forEach(([allowedDomain, domainFromToken]) => {
+  allowedCombinations.forEach(([allowedIssuer, domainFromToken]) => {
     t.test(
-      `allows domain ${allowedDomain} requested with ${domainFromToken} for discovery`,
+      `allows domain ${allowedIssuer} requested with ${domainFromToken} for discovery`,
       async t => {
-        const allowedDomainSlash = allowedDomain.endsWith('/')
-          ? allowedDomain
-          : `${allowedDomain}/`
-        nock(allowedDomain)
+        const allowedIssuerSlash = allowedIssuer.endsWith('/')
+          ? allowedIssuer
+          : `${allowedIssuer}/`
+        nock(allowedIssuer)
           .get('/.well-known/openid-configuration')
           .reply(200, {
-            issuer: allowedDomain,
-            jwks_uri: `${allowedDomainSlash}.well-known/certs`,
+            issuer: allowedIssuer,
+            jwks_uri: `${allowedIssuerSlash}.well-known/certs`,
           })
-        nock(allowedDomain).get('/.well-known/certs').reply(200, jwks)
+        nock(allowedIssuer).get('/.well-known/certs').reply(200, jwks)
         const getJwks = buildGetJwks({
           providerDiscovery: true,
-          allowedDomains: [allowedDomain],
+          issuersWhitelist: [allowedIssuer],
         })
 
         const [{ alg, kid }] = jwks.keys
@@ -290,7 +290,7 @@ t.test('allowed domains for discovery', async t => {
 
     const getJwks = buildGetJwks({
       providerDiscovery: true,
-      allowedDomains: [domain1, domain2],
+      issuersWhitelist: [domain1, domain2],
     })
 
     const [{ alg, kid }] = jwks.keys
@@ -302,7 +302,7 @@ t.test('allowed domains for discovery', async t => {
   t.test('forbids domain outside of the allow list', async t => {
     const getJwks = buildGetJwks({
       providerDiscovery: true,
-      allowedDomains: ['https://example.com/'],
+      issuersWhitelist: ['https://example.com/'],
     })
 
     const [{ alg, kid }] = jwks.keys

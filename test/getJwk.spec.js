@@ -235,7 +235,7 @@ t.test('allowed domains', async t => {
         nock(allowedDomain).get('/.well-known/jwks.json').reply(200, jwks)
 
         const getJwks = buildGetJwks({
-          allowedDomains: [allowedDomain],
+          issuersWhitelist: [allowedDomain],
         })
 
         const [{ alg, kid }] = jwks.keys
@@ -252,7 +252,7 @@ t.test('allowed domains', async t => {
     nock(domain1).get('/.well-known/jwks.json').reply(200, jwks)
     nock(domain2).get('/.well-known/jwks.json').reply(200, jwks)
 
-    const getJwks = buildGetJwks({ allowedDomains: [domain1, domain2] })
+    const getJwks = buildGetJwks({ issuersWhitelist: [domain1, domain2] })
 
     const [{ alg, kid }] = jwks.keys
 
@@ -297,7 +297,7 @@ t.test('allowed domains', async t => {
 
   t.test('forbids domain outside of the allow list', async t => {
     const getJwks = buildGetJwks({
-      allowedDomains: ['https://example.com/'],
+      issuersWhitelist: ['https://example.com/'],
     })
 
     const [{ alg, kid }] = jwks.keys
