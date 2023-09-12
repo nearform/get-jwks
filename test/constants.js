@@ -1,7 +1,7 @@
 'use strict'
 
-const { readFileSync } = require('fs')
-const path = require('path')
+const { readFileSync } = require('node:fs')
+const path = require('node:path')
 const jwt = require('jsonwebtoken')
 
 const domain = 'https://localhost/'

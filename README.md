@@ -15,7 +15,7 @@ npm install get-jwks
 ### Options
 
 ```js
-const https = require('https')
+const https = require('node:https')
 const buildGetJwks = require('get-jwks')
 
 const getJwks = buildGetJwks({
