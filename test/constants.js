@@ -36,13 +36,17 @@ const jwks = {
     }
   ],
 }
+
 const privateKey = readFileSync(path.join(__dirname, 'private.pem'), 'utf8')
+
 const jwk = jwks.keys[1]
+
 const token = jwt.sign({ name: 'Jane Doe' }, privateKey, {
   algorithm: jwk.alg,
   issuer: domain,
   keyid: jwk.kid,
 })
+
 const oidcConfig = {
   issuer: 'https://localhost/',
   jwks_uri: 'https://localhost/.well-known/certs',
