@@ -6,18 +6,21 @@ const jwkToPem = require('jwk-to-pem')
 
 const { errorCode, GetJwksError } = require('./error')
 
+const ONE_MINUTE = 60 * 1000
+const FIVE_SECONDS = 5 * 1000
+
 function ensureTrailingSlash(domain) {
-  return domain.endsWith('/') ? domain : `${domain}/`
+  return domain[domain.length - 1] === '/' ? domain : `${domain}/`
 }
 
 function ensureNoLeadingSlash(path) {
-  return path.startsWith('/') ? path.substring(1) : path
+  return path[0] === '/' ? path.substring(1) : path
 }
 
 function buildGetJwks(options = {}) {
   const max = options.max || 100
-  const ttl = options.ttl || 60 * 1000 /* 1 minute */
-  const timeout = options.timeout || 5 * 1000 /* 5 seconds */
+  const ttl = options.ttl || ONE_MINUTE
+  const timeout = options.timeout || FIVE_SECONDS
   const issuersWhitelist = (options.issuersWhitelist || options.allowedDomains || []).map(ensureTrailingSlash)
   const checkIssuer = options.checkIssuer
   const providerDiscovery = options.providerDiscovery || false
@@ -83,7 +86,7 @@ function buildGetJwks(options = {}) {
     }
 
     const jwkPromise = retrieveJwk(normalizedDomain, alg, kid).catch(
-      async err => {
+      err => {
         const stale = staleCache.get(cacheKey)
 
         cache.delete(cacheKey)
@@ -118,7 +121,7 @@ function buildGetJwks(options = {}) {
       })
     }
 
-    if (!body.keys || body.keys.length === 0) {
+    if (!body.keys?.length) {
       throw new GetJwksError(errorCode.NO_JWKS)
     }
 
