@@ -7,11 +7,11 @@ const { jwks, domain } = require('./constants')
 const buildGetJwks = require('../src/get-jwks')
 const { GetJwksError, errorCode } = require('../src/error')
 
-t.beforeEach(async () => {
+t.beforeEach(() => {
   nock.disableNetConnect()
 })
 
-t.afterEach(async () => {
+t.afterEach(() => {
   nock.cleanAll()
   nock.enableNetConnect()
 })
