@@ -7,11 +7,11 @@ const { createVerifier } = require('fast-jwt')
 const { jwks, token } = require('./constants')
 const buildGetJwks = require('../src/get-jwks')
 
-t.beforeEach(async () => {
+t.beforeEach(() => {
   nock.disableNetConnect()
 })
 
-t.afterEach(async () => {
+t.afterEach(() => {
   nock.cleanAll()
   nock.enableNetConnect()
 })

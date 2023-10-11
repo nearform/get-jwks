@@ -8,11 +8,11 @@ const fjwt = require('@fastify/jwt')
 const { oidcConfig, jwks, token, domain } = require('./constants')
 const buildGetJwks = require('../src/get-jwks')
 
-t.beforeEach(async () => {
+t.beforeEach(() => {
   nock.disableNetConnect()
 })
 
-t.afterEach(async () => {
+t.afterEach(() => {
   nock.cleanAll()
   nock.enableNetConnect()
 })
