@@ -3,6 +3,7 @@
   "version": "9.0.0",
   "description": "Fetch utils for JWKS keys",
   "main": "src/get-jwks.js",
+  "type": "commonjs",
   "types": "./src/get-jwks.d.ts",
   "files": [
     "src"
