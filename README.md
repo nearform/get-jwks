@@ -1,6 +1,6 @@
 # get-jwks
 
-[![Build](https://github.com/nearform/get-jwks/workflows/CI/badge.svg)](https://github.com/nearform/get-jwks/actions?query=workflow%3ACI)
+[![ci](https://github.com/nearform/get-jwks/actions/workflows/ci.yml/badge.svg)](https://github.com/nearform/get-jwks/actions/workflows/ci.yml)
 
 Fetch utils for JWKS keys
 
