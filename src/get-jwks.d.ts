@@ -1,16 +1,16 @@
 import type { LRUCache } from 'lru-cache'
 import type { Agent } from 'https'
 
-type JWKSignature = { domain: string; alg: string; kid: string }
-type JWK = { [key: string]: any; domain: string; alg: string; kid: string }
+export type JWKSignature = { domain: string; alg: string; kid: string }
+export type JWK = { [key: string]: any; domain: string; alg: string; kid: string }
 
-type GetPublicKeyOptions = {
+export type GetPublicKeyOptions = {
   domain?: string
   alg?: string
   kid?: string
 }
 
-type GetJwksOptions = {
+export type GetJwksOptions = {
   max?: number
   ttl?: number
   issuersWhitelist?: string[]
@@ -20,7 +20,7 @@ type GetJwksOptions = {
   timeout?: number
 }
 
-type GetJwks = {
+export type GetJwks = {
   getPublicKey: (options?: GetPublicKeyOptions) => Promise<string>
   getJwk: (signature: JWKSignature) => Promise<JWK>
   getJwksUri: (normalizedDomain: string) => Promise<string>
