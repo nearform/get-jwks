@@ -10,6 +10,9 @@ jobs:
   check_pull_requests:
     runs-on: ubuntu-latest
     name: Check linked issues
+    permissions:
+      issues: read
+      pull-requests: write
     steps:
       - uses: GitHubSecurityLab/actions-permissions/monitor@v1
         with:
@@ -18,6 +21,3 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           exclude-branches: release/**, dependabot/**
-    permissions:
-      issues: read
-      pull-requests: write
