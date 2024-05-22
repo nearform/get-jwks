@@ -20,4 +20,5 @@ jobs:
           exclude-branches: release/**, dependabot/**
     permissions:
       issues: read
+      metadata: read
       pull-requests: write
