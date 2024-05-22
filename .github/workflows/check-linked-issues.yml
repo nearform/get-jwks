@@ -15,8 +15,6 @@ jobs:
       pull-requests: write
     steps:
       - uses: GitHubSecurityLab/actions-permissions/monitor@v1
-        with:
-          config: ${{ secrets.GITHUB_TOKEN }}
       - uses: nearform-actions/github-action-check-linked-issues@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
