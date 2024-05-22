@@ -7,17 +7,13 @@ name: Check Linked Issues
       - reopened
       - synchronize
 jobs:
-  permissions-checker:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: GitHubSecurityLab/actions-permissions/monitor@v1
-        with:
-          config: ${{ secrets.GITHUB_TOKEN }}
-
   check_pull_requests:
     runs-on: ubuntu-latest
     name: Check linked issues
     steps:
+      - uses: GitHubSecurityLab/actions-permissions/monitor@v1
+        with:
+          config: ${{ secrets.GITHUB_TOKEN }}
       - uses: nearform-actions/github-action-check-linked-issues@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}

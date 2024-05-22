@@ -15,13 +15,6 @@ on:
     types: [closed]
 
 jobs:
-  permissions-checker:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: GitHubSecurityLab/actions-permissions/monitor@v1
-        with:
-          config: ${{ secrets.GITHUB_TOKEN }}
-
   release:
     permissions:
       contents: write
@@ -30,6 +23,9 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     steps:
+      - uses: GitHubSecurityLab/actions-permissions/monitor@v1
+        with:
+          config: ${{ secrets.GITHUB_TOKEN }}
       - uses: nearform-actions/optic-release-automation-action@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}

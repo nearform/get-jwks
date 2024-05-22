@@ -10,19 +10,15 @@ name: notify-release
     types:
       - closed
 jobs:
-  permissions-checker:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: GitHubSecurityLab/actions-permissions/monitor@v1
-        with:
-          config: ${{ secrets.GITHUB_TOKEN }}
-
   setup:
     runs-on: ubuntu-latest
     permissions:
       issues: write
       contents: read
     steps:
+      - uses: GitHubSecurityLab/actions-permissions/monitor@v1
+        with:
+          config: ${{ secrets.GITHUB_TOKEN }}
       - uses: nearform-actions/github-action-notify-release@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
