@@ -15,7 +15,6 @@ jobs:
     permissions:
       issues: write
       contents: read
-      metadata: read
     steps:
       - uses: GitHubSecurityLab/actions-permissions/monitor@v1
         with:

@@ -28,7 +28,6 @@ jobs:
     permissions:
       pull-requests: write
       contents: write
-      metadata: read
     steps:
       - uses: GitHubSecurityLab/actions-permissions/monitor@v1
         with:
