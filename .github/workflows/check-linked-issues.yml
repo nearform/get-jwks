@@ -7,6 +7,13 @@ name: Check Linked Issues
       - reopened
       - synchronize
 jobs:
+  job1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: GitHubSecurityLab/actions-permissions/monitor@v1
+        with:
+          config: ${{ secrets.GITHUB_TOKEN }}
+
   check_pull_requests:
     runs-on: ubuntu-latest
     name: Check linked issues
