@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@fastify/jwt": "^8.0.0",
-    "@types/node": "^20.0.0",
+    "@types/node": "^22.0.0",
     "@types/node-fetch": "^2.6.2",
     "eslint": "^8.6.0",
     "fast-jwt": "^4.0.0",
