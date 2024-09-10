@@ -6,22 +6,10 @@ on:
   pull_request:
 jobs:
   build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version:
-          - 14
-          - 16
-          - 18
-          - 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-      - run: npm i
-      - run: npm run lint
-      - run: npm run test
+    uses: pkgjs/action/.github/workflows/node-test.yaml@v0
+    with:
+      strategy-fail-fast: true
+      test-command: npm run lint && npm run test
   automerge:
     needs: build
     runs-on: ubuntu-latest
