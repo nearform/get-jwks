@@ -14,7 +14,7 @@
     "directory": "./test/types"
   },
   "scripts": {
-    "test": "tap test/*.spec.js && tsd",
+    "test": "node --test test/*.spec.js && tsd",
     "lint": "eslint ."
   },
   "repository": {
@@ -47,7 +47,6 @@
     "nock": "^13.0.7",
     "prettier": "^3.0.0",
     "sinon": "^19.0.2",
-    "tap": "^16.0.0",
     "tsd": "^0.31.0",
     "typescript": "^5.0.2"
   }

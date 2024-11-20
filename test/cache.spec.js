@@ -1,6 +1,6 @@
 'use strict'
 
-const t = require('tap')
+const {test} = require('node:test')
 const nock = require('nock')
 const jwkToPem = require('jwk-to-pem')
 
@@ -8,7 +8,7 @@ const { jwks, domain } = require('./constants')
 
 const buildGetJwks = require('../src/get-jwks')
 
-t.test(
+test(
   'if there is already a key in cache, it should not make a http request',
   async t => {
     const getJwks = buildGetJwks()
@@ -20,14 +20,14 @@ t.test(
 
     const publicKey = await getJwks.getPublicKey({ domain, alg, kid })
     const jwk = await getJwks.getJwk({ domain, alg, kid })
-    t.ok(publicKey)
-    t.ok(jwk)
-    t.equal(publicKey, jwkToPem(jwk))
-    t.same(jwk, localKey)
+    t.assert.ok(publicKey)
+    t.assert.ok(jwk)
+    t.assert.equal(publicKey, jwkToPem(jwk))
+    t.assert.equal(jwk, localKey)
   }
 )
 
-t.test(
+test(
   'if initialized without any cache settings it should use default values',
   async t => {
     nock('https://localhost/').get('/.well-known/jwks.json').reply(200, jwks)
@@ -37,10 +37,10 @@ t.test(
     const publicKey = await getJwks.getPublicKey({ domain, alg, kid })
     const jwk = await getJwks.getJwk({ domain, alg, kid })
 
-    t.ok(publicKey)
-    t.ok(jwk)
-    t.ok(getJwks.cache)
-    t.equal(cache.max, 100)
-    t.equal(cache.ttl, 60000)
+    t.assert.ok(publicKey)
+    t.assert.ok(jwk)
+    t.assert.ok(getJwks.cache)
+    t.assert.equal(cache.max, 100)
+    t.assert.equal(cache.ttl, 60000)
   }
 )

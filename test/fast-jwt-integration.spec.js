@@ -1,22 +1,22 @@
 'use strict'
 
-const t = require('tap')
+const {beforeEach, afterEach, test} = require('node:test')
 const nock = require('nock')
 const { createVerifier } = require('fast-jwt')
 
 const { jwks, token } = require('./constants')
 const buildGetJwks = require('../src/get-jwks')
 
-t.beforeEach(() => {
+beforeEach(() => {
   nock.disableNetConnect()
 })
 
-t.afterEach(() => {
+afterEach(() => {
   nock.cleanAll()
   nock.enableNetConnect()
 })
 
-t.test('fast-jwt integration tests', async t => {
+test('fast-jwt integration tests', async t => {
   const domain = 'https://localhost/'
   nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
 
@@ -33,5 +33,5 @@ t.test('fast-jwt integration tests', async t => {
   })
   const payload = await verifyWithPromise(token)
 
-  t.equal(payload.name, 'Jane Doe')
+  t.assert.equal(payload.name, 'Jane Doe')
 })
