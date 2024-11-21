@@ -1,6 +1,5 @@
 'use strict'
 
-const fetch = require('node-fetch')
 const { LRUCache } = require('lru-cache')
 const jwkToPem = require('jwk-to-pem')
 
@@ -20,14 +19,13 @@ function ensureNoLeadingSlash(path) {
 function buildGetJwks(options = {}) {
   const max = options.max || 100
   const ttl = options.ttl || ONE_MINUTE
-  const timeout = options.timeout || FIVE_SECONDS
   const issuersWhitelist = (options.issuersWhitelist || []).map(ensureTrailingSlash)
   const checkIssuer = options.checkIssuer
   const providerDiscovery = options.providerDiscovery || false
   const jwksPath = options.jwksPath
     ? ensureNoLeadingSlash(options.jwksPath)
     : false
-  const agent = options.agent || null
+  const fetchOptions = { timeout: FIVE_SECONDS, ...options.fetchOptions }
   const staleCache = new LRUCache({ max: max * 2, ttl })
   const cache = new LRUCache({
     max,
@@ -38,10 +36,7 @@ function buildGetJwks(options = {}) {
   async function getJwksUri(normalizedDomain) {
     const response = await fetch(
       `${normalizedDomain}.well-known/openid-configuration`,
-      {
-        agent,
-        timeout,
-      }
+      fetchOptions,
     )
     const body = await response.json()
 
@@ -111,7 +106,7 @@ function buildGetJwks(options = {}) {
       ? await getJwksUri(normalizedDomain)
       : `${normalizedDomain}.well-known/jwks.json`
 
-    const response = await fetch(jwksUri, { agent, timeout })
+    const response = await fetch(jwksUri, fetchOptions)
     const body = await response.json()
 
     if (!response.ok) {

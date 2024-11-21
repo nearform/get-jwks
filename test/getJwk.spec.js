@@ -38,7 +38,7 @@ test('rejects if alg and kid do not match', async t => {
 
   await t.assert.rejects(
     getJwks.getJwk({ domain, alg: 'NOT', kid: 'FOUND' }),
-    'No matching JWK found in the set.',
+    new GetJwksError('JWK_NOT_FOUND', 'No matching JWK found in the set.'),
   )
 })
 
@@ -309,20 +309,20 @@ describe('allowed domains', () => {
   })
 })
 
-test('timeout', async t => {
+describe('timeout', () => {
   const domain = 'https://example.com'
   const [{ alg, kid }] = jwks.keys
 
-  beforeEach(() =>
-    nock(domain).get('/.well-known/jwks.json').reply(200, jwks),
-  )
-
   let timeout
-  const buildGetJwks = t.mock('../src/get-jwks', {
-    'node-fetch': (init, options) => {
+
+  beforeEach(() => {
+    global.fetch = (url, options) => {
       timeout = options.timeout
-      return require('node-fetch')(init, options)
-    },
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(jwks)
+      })
+    }
   })
 
   test('timeout defaults to 5 seconds', async t => {
@@ -332,7 +332,7 @@ test('timeout', async t => {
   })
 
   test('ensures that timeout is set to 10 seconds', async t => {
-    const getJwks = buildGetJwks({ timeout: 10000 })
+    const getJwks = buildGetJwks({ fetchOptions: { timeout: 10000 } })
     await getJwks.getJwk({ domain, alg, kid })
     t.assert.equal(timeout, 10000)
   })

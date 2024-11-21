@@ -49,19 +49,17 @@ test(
   },
 )
 
-describe('timeout', async t => {
-  beforeEach(() =>
-    nock(domain)
-      .get('/.well-known/openid-configuration')
-      .reply(200, { jwks_uri: 'http://localhost' }),
-  )
-
+describe('timeout', () => {
   let timeout
-  const buildGetJwks = t.mock('../src/get-jwks', {
-    'node-fetch': (input, options) => {
+
+  beforeEach(() => {
+    global.fetch = (url, options) => {
       timeout = options.timeout
-      return require('node-fetch')(input, options)
-    },
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ jwks_uri: 'http://localhost' })
+      })
+    }
   })
 
   test('timeout defaults to 5 seconds', async t => {
@@ -71,7 +69,7 @@ describe('timeout', async t => {
   })
 
   test('ensures that timeout is set to 10 seconds', async t => {
-    const getJwks = buildGetJwks({ timeout: 10000 })
+    const getJwks = buildGetJwks({fetchOptions: {timeout: 10000 }})
     await getJwks.getJwksUri(domain)
     t.assert.equal(timeout, 10000)
   })
