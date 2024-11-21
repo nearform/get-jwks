@@ -1,6 +1,6 @@
 'use strict'
 
-const t = require('tap')
+const { beforeEach, afterEach, test } = require('node:test')
 const nock = require('nock')
 const Fastify = require('fastify')
 const fjwt = require('@fastify/jwt')
@@ -8,16 +8,16 @@ const fjwt = require('@fastify/jwt')
 const { oidcConfig, jwks, token, domain } = require('./constants')
 const buildGetJwks = require('../src/get-jwks')
 
-t.beforeEach(() => {
+beforeEach(() => {
   nock.disableNetConnect()
 })
 
-t.afterEach(() => {
+afterEach(() => {
   nock.cleanAll()
   nock.enableNetConnect()
 })
 
-t.test('@fastify/jwt integration tests', async t => {
+test('@fastify/jwt integration tests', async t => {
   nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
 
   const fastify = Fastify()
@@ -52,11 +52,11 @@ t.test('@fastify/jwt integration tests', async t => {
     },
   })
 
-  t.equal(response.statusCode, 200)
-  t.equal(response.body, 'Jane Doe')
+  t.assert.equal(response.statusCode, 200)
+  t.assert.equal(response.body, 'Jane Doe')
 })
 
-t.test('@fastify/jwt integration tests with providerDiscovery', async t => {
+test('@fastify/jwt integration tests with providerDiscovery', async t => {
   nock(domain)
     .get('/.well-known/openid-configuration')
     .once()
@@ -94,6 +94,6 @@ t.test('@fastify/jwt integration tests with providerDiscovery', async t => {
     },
   })
 
-  t.equal(response.statusCode, 200)
-  t.equal(response.body, 'Jane Doe')
+  t.assert.equal(response.statusCode, 200)
+  t.assert.equal(response.body, 'Jane Doe')
 })

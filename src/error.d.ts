@@ -1,5 +1,3 @@
-import type { Response } from 'node-fetch'
-
 export enum errorCode {
   OPENID_CONFIGURATION_REQUEST_FAILED = 'OPENID_CONFIGURATION_REQUEST_FAILED',
   JWKS_REQUEST_FAILED = 'JWKS_REQUEST_FAILED',

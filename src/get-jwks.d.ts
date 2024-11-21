@@ -1,5 +1,4 @@
 import type { LRUCache } from 'lru-cache'
-import type { Agent } from 'https'
 
 type GetPublicKeyOptions = {
   domain?: string
@@ -24,8 +23,7 @@ type GetJwksOptions = {
   issuersWhitelist?: string[]
   providerDiscovery?: boolean
   jwksPath?: string
-  agent?: Agent
-  timeout?: number
+  fetchOptions?: RequestInit
 }
 
 declare namespace buildGetJwks {

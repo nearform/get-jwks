@@ -1,13 +1,13 @@
 'use strict'
 
-const t = require('tap')
+const {test} = require('node:test')
 const jwkToPem = require('jwk-to-pem')
 const sinon = require('sinon')
 
 const { jwks } = require('./constants')
 const buildGetJwks = require('../src/get-jwks')
 
-t.test('it provides the result of getJwk to jwkToPem', async t => {
+test('it provides the result of getJwk to jwkToPem', async t => {
   const getJwks = buildGetJwks()
 
   const [jwk] = jwks.keys
@@ -18,14 +18,14 @@ t.test('it provides the result of getJwk to jwkToPem', async t => {
 
   const pem = await getJwks.getPublicKey(signature)
 
-  t.equal(pem, jwkToPem(jwk))
+  t.assert.equal(pem, jwkToPem(jwk))
   sinon.assert.calledOnceWithExactly(getJwkStub, signature)
 })
 
-t.test('it rejects if getJwk rejects', t => {
+test('it rejects if getJwk rejects', t => {
   const getJwks = buildGetJwks()
 
   sinon.stub(getJwks, 'getJwk').rejects(new Error('boom'))
 
-  return t.rejects(getJwks.getPublicKey('whatever'), 'boom')
+  return t.assert.rejects(getJwks.getPublicKey('whatever'), new Error('boom'))
 })

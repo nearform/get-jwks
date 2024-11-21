@@ -1,22 +1,22 @@
 'use strict'
 
 const nock = require('nock')
-const t = require('tap')
+const {beforeEach, afterEach, test, describe} = require('node:test')
 
 const { jwks, domain } = require('./constants')
 const buildGetJwks = require('../src/get-jwks')
 const { GetJwksError, errorCode } = require('../src/error')
 
-t.beforeEach(() => {
+beforeEach(() => {
   nock.disableNetConnect()
 })
 
-t.afterEach(() => {
+afterEach(() => {
   nock.cleanAll()
   nock.enableNetConnect()
 })
 
-t.test('rejects if the request fails', async t => {
+test('rejects if the request fails', async t => {
   nock(domain).get('/.well-known/jwks.json').reply(500, { msg: 'boom' })
 
   const [{ alg, kid }] = jwks.keys
@@ -28,32 +28,32 @@ t.test('rejects if the request fails', async t => {
     body: { msg: 'boom' },
   }
 
-  await t.rejects(getJwks.getJwk({ domain, alg, kid }), expectedError)
+  await t.assert.rejects(getJwks.getJwk({ domain, alg, kid }), expectedError)
 })
 
-t.test('rejects if alg and kid do not match', async t => {
+test('rejects if alg and kid do not match', async t => {
   nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
 
   const getJwks = buildGetJwks()
 
-  await t.rejects(
+  await t.assert.rejects(
     getJwks.getJwk({ domain, alg: 'NOT', kid: 'FOUND' }),
-    'No matching JWK found in the set.',
+    new GetJwksError('JWK_NOT_FOUND', 'No matching JWK found in the set.'),
   )
 })
 
-t.test('returns a jwk if alg and kid match', async t => {
+test('returns a jwk if alg and kid match', async t => {
   nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
   const key = jwks.keys[0]
 
   const jwk = await getJwks.getJwk({ domain, alg: key.alg, kid: key.kid })
 
-  t.ok(jwk)
-  t.same(jwk, key)
+  t.assert.ok(jwk)
+  t.assert.deepStrictEqual(jwk, key)
 })
 
-t.test('returns a jwk if alg and kid match and path is specified', async t => {
+test('returns a jwk if alg and kid match and path is specified', async t => {
   nock(domain).get('/otherdir/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks({ jwksPath: '/otherdir/jwks.json' })
   const key = jwks.keys[0]
@@ -64,22 +64,22 @@ t.test('returns a jwk if alg and kid match and path is specified', async t => {
     kid: key.kid,
   })
 
-  t.ok(jwk)
-  t.same(jwk, key)
+  t.assert.ok(jwk)
+  t.assert.deepStrictEqual(jwk, key)
 })
 
-t.test('returns a jwk if no alg is provided and kid match', async t => {
+test('returns a jwk if no alg is provided and kid match', async t => {
   nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
   const key = jwks.keys[2]
 
   const jwk = await getJwks.getJwk({ domain, kid: key.kid })
 
-  t.ok(jwk)
-  t.same(jwk, key)
+  t.assert.ok(jwk)
+  t.assert.deepStrictEqual(jwk, key)
 })
 
-t.test(
+test(
   'returns a jwk if no alg is provided and kid match but jwk has alg',
   async t => {
     nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
@@ -88,12 +88,12 @@ t.test(
 
     const jwk = await getJwks.getJwk({ domain, kid: key.kid })
 
-    t.ok(jwk)
-    t.same(jwk, key)
+    t.assert.ok(jwk)
+    t.assert.deepStrictEqual(jwk, key)
   },
 )
 
-t.test('caches a successful response', async t => {
+test('caches a successful response', async t => {
   nock(domain).get('/.well-known/jwks.json').once().reply(200, jwks)
 
   const getJwks = buildGetJwks()
@@ -103,62 +103,62 @@ t.test('caches a successful response', async t => {
   await getJwks.getJwk({ domain, alg, kid })
   const jwk = await getJwks.getJwk({ domain, alg, kid })
 
-  t.ok(jwk)
-  t.same(jwk, key)
+  t.assert.ok(jwk)
+  t.assert.deepStrictEqual(jwk, key)
 })
 
-t.test('does not cache a failed response', async t => {
+test('does not cache a failed response', async t => {
   nock(domain).get('/.well-known/jwks.json').once().reply(500, { msg: 'boom' })
   nock(domain).get('/.well-known/jwks.json').once().reply(200, jwks)
 
   const [{ alg, kid }] = jwks.keys
   const getJwks = buildGetJwks()
 
-  await t.rejects(getJwks.getJwk({ domain, alg, kid }))
-  await t.resolves(getJwks.getJwk({ domain, alg, kid }))
+  await t.assert.rejects(getJwks.getJwk({ domain, alg, kid }))
+  await getJwks.getJwk({ domain, alg, kid })
 })
 
-t.test('rejects if response is an empty object', async t => {
+test('rejects if response is an empty object', async t => {
   nock(domain).get('/.well-known/jwks.json').reply(200, {})
   const getJwks = buildGetJwks()
   const [{ alg, kid }] = jwks.keys
 
-  return t.rejects(
+  return t.assert.rejects(
     getJwks.getJwk({ domain, alg, kid }),
-    'No JWKS found in the response.',
+    new GetJwksError('NO_JWKS', 'No JWKS found in the response.'),
   )
 })
 
-t.test('rejects if no JWKS are found in the response', async t => {
+test('rejects if no JWKS are found in the response', async t => {
   nock(domain).get('/.well-known/jwks.json').reply(200, { keys: [] })
   const getJwks = buildGetJwks()
   const [{ alg, kid }] = jwks.keys
 
-  return t.rejects(
+  return t.assert.rejects(
     getJwks.getJwk({ domain, alg, kid }),
-    'No JWKS found in the response.',
+    new GetJwksError('NO_JWKS', 'No JWKS found in the response.'),
   )
 })
 
-t.test('supports domain without trailing slash', async t => {
+test('supports domain without trailing slash', async t => {
   nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks()
   const [{ alg, kid }] = jwks.keys
 
   const key = await getJwks.getJwk({ domain: 'https://localhost', alg, kid })
-  t.ok(key)
+  t.assert.ok(key)
 })
 
-t.test('supports path without leading slash', async t => {
+test('supports path without leading slash', async t => {
   nock(domain).get('/otherdir/jwks.json').reply(200, jwks)
   const getJwks = buildGetJwks({ jwksPath: 'otherdir/jwks.json' })
   const [{ alg, kid }] = jwks.keys
 
   const key = await getJwks.getJwk({ domain: 'https://localhost', alg, kid })
-  t.ok(key)
+  t.assert.ok(key)
 })
 
-t.test('does not execute concurrent requests', () => {
+test('does not execute concurrent requests', () => {
   nock(domain).get('/.well-known/jwks.json').once().reply(200, jwks)
 
   const getJwks = buildGetJwks()
@@ -170,7 +170,7 @@ t.test('does not execute concurrent requests', () => {
   ])
 })
 
-t.test('returns a stale cached value if request fails', async t => {
+test('returns a stale cached value if request fails', async t => {
   // allow 2 requests, third will throw an error
   nock(domain).get('/.well-known/jwks.json').twice().reply(200, jwks)
   nock(domain).get('/.well-known/jwks.json').once().reply(500, { boom: true })
@@ -201,11 +201,11 @@ t.test('returns a stale cached value if request fails', async t => {
     kid: key1.kid,
   })
 
-  t.strictSame(key, key1)
+  t.assert.deepStrictEqual(key, key1)
 })
 
-t.test('allowed domains', async t => {
-  t.test('allows any domain by default', async t => {
+describe('allowed domains', () => {
+  test('allows any domain by default', async t => {
     const domain = 'https://example.com'
 
     nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
@@ -214,7 +214,7 @@ t.test('allowed domains', async t => {
 
     const [{ alg, kid }] = jwks.keys
 
-    t.ok(await getJwks.getJwk({ domain, alg, kid }))
+    t.assert.ok(await getJwks.getJwk({ domain, alg, kid }))
   })
 
   const allowedCombinations = [
@@ -229,7 +229,7 @@ t.test('allowed domains', async t => {
   ]
 
   allowedCombinations.forEach(([allowedDomain, domainFromToken]) => {
-    t.test(
+    test(
       `allows domain ${allowedDomain} requested with ${domainFromToken}`,
       async t => {
         nock(allowedDomain).get('/.well-known/jwks.json').reply(200, jwks)
@@ -240,12 +240,12 @@ t.test('allowed domains', async t => {
 
         const [{ alg, kid }] = jwks.keys
 
-        t.ok(await getJwks.getJwk({ domain: domainFromToken, alg, kid }))
+        t.assert.ok(await getJwks.getJwk({ domain: domainFromToken, alg, kid }))
       },
     )
   })
 
-  t.test('allows multiple domains', async t => {
+  test('allows multiple domains', async t => {
     const domain1 = 'https://example1.com'
     const domain2 = 'https://example2.com'
 
@@ -256,11 +256,11 @@ t.test('allowed domains', async t => {
 
     const [{ alg, kid }] = jwks.keys
 
-    t.ok(await getJwks.getJwk({ domain: domain1, alg, kid }))
-    t.ok(await getJwks.getJwk({ domain: domain2, alg, kid }))
+    t.assert.ok(await getJwks.getJwk({ domain: domain1, alg, kid }))
+    t.assert.ok(await getJwks.getJwk({ domain: domain2, alg, kid }))
   })
 
-  t.test('checks token issuer', async t => {
+  test('checks token issuer', async t => {
     const domain = 'https://example.com/realms/REALM_NAME'
 
     nock(domain).get('/.well-known/jwks.json').reply(200, jwks)
@@ -275,10 +275,10 @@ t.test('allowed domains', async t => {
 
     const [{ alg, kid }] = jwks.keys
 
-    t.ok(await getJwks.getJwk({ domain, alg, kid }))
+    t.assert.ok(await getJwks.getJwk({ domain, alg, kid }))
   })
 
-  t.test('forbids invalid issuer', async t => {
+  test('forbids invalid issuer', async t => {
     const getJwks = buildGetJwks({
       checkIssuer: (issuer) => {
         const url = new URL(issuer)
@@ -289,51 +289,51 @@ t.test('allowed domains', async t => {
 
     const [{ alg, kid }] = jwks.keys
 
-    return t.rejects(
+    return t.assert.rejects(
       getJwks.getJwk({ domain, alg, kid }),
       'Issuer is not allowed.',
     )
   })
 
-  t.test('forbids domain outside of the allow list', async t => {
+  test('forbids domain outside of the allow list', async t => {
     const getJwks = buildGetJwks({
       issuersWhitelist: ['https://example.com/'],
     })
 
     const [{ alg, kid }] = jwks.keys
 
-    return t.rejects(
+    return t.assert.rejects(
       getJwks.getJwk({ domain, alg, kid }),
-      'The domain is not allowed.',
+      new GetJwksError('DOMAIN_NOT_ALLOWED', 'The domain is not allowed.'),
     )
   })
 })
 
-t.test('timeout', async t => {
+describe('timeout', () => {
   const domain = 'https://example.com'
   const [{ alg, kid }] = jwks.keys
 
-  t.beforeEach(() =>
-    nock(domain).get('/.well-known/jwks.json').reply(200, jwks),
-  )
-
   let timeout
-  const buildGetJwks = t.mock('../src/get-jwks', {
-    'node-fetch': (init, options) => {
+
+  beforeEach(() => {
+    global.fetch = (url, options) => {
       timeout = options.timeout
-      return require('node-fetch')(init, options)
-    },
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(jwks)
+      })
+    }
   })
 
-  t.test('timeout defaults to 5 seconds', async t => {
+  test('timeout defaults to 5 seconds', async t => {
     const getJwks = buildGetJwks()
     await getJwks.getJwk({ domain, alg, kid })
-    t.equal(timeout, 5000)
+    t.assert.equal(timeout, 5000)
   })
 
-  t.test('ensures that timeout is set to 10 seconds', async t => {
-    const getJwks = buildGetJwks({ timeout: 10000 })
+  test('ensures that timeout is set to 10 seconds', async t => {
+    const getJwks = buildGetJwks({ fetchOptions: { timeout: 10000 } })
     await getJwks.getJwk({ domain, alg, kid })
-    t.equal(timeout, 10000)
+    t.assert.equal(timeout, 10000)
   })
 })

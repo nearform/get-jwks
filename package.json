@@ -14,7 +14,7 @@
     "directory": "./test/types"
   },
   "scripts": {
-    "test": "tap test/*.spec.js && tsd",
+    "test": "node --test test/*.spec.js && tsd",
     "lint": "eslint ."
   },
   "repository": {
@@ -33,21 +33,18 @@
   "homepage": "https://github.com/nearform/get-jwks#readme",
   "dependencies": {
     "jwk-to-pem": "^2.0.4",
-    "lru-cache": "^11.0.0",
-    "node-fetch": "^2.6.1"
+    "lru-cache": "^11.0.0"
   },
   "devDependencies": {
     "@fastify/jwt": "^8.0.0",
     "@types/node": "^22.0.0",
-    "@types/node-fetch": "^2.6.2",
     "eslint": "^8.6.0",
     "fast-jwt": "^4.0.0",
     "fastify": "^4.0.3",
     "jsonwebtoken": "^9.0.0",
-    "nock": "^13.0.7",
+    "nock": "^v14.0.0-beta.16",
     "prettier": "^3.0.0",
     "sinon": "^19.0.2",
-    "tap": "^16.0.0",
     "tsd": "^0.31.0",
     "typescript": "^5.0.2"
   }
