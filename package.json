@@ -36,7 +36,7 @@
     "lru-cache": "^11.0.0"
   },
   "devDependencies": {
-    "@fastify/jwt": "^8.0.0",
+    "@fastify/jwt": "^9.0.1",
     "@types/node": "^22.0.0",
     "eslint": "^8.6.0",
     "fast-jwt": "^4.0.0",
