@@ -42,7 +42,7 @@
     "fast-jwt": "^4.0.0",
     "fastify": "^4.0.3",
     "jsonwebtoken": "^9.0.0",
-    "nock": "^v14.0.0-beta.16",
+    "nock": "^v14.0.0-beta.17",
     "prettier": "^3.0.0",
     "sinon": "^19.0.2",
     "tsd": "^0.31.0",
