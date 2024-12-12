@@ -1,4 +1,4 @@
-import type { LRUCache } from 'lru-cache'
+import Cache from './cache'
 
 type GetPublicKeyOptions = {
   domain?: string
@@ -13,8 +13,8 @@ type GetJwks = {
   getPublicKey: (options?: GetPublicKeyOptions) => Promise<string>
   getJwk: (signature: JWKSignature) => Promise<JWK>
   getJwksUri: (normalizedDomain: string) => Promise<string>
-  cache: LRUCache<string, JWK>
-  staleCache: LRUCache<string, JWK>
+  cache: Cache<string, JWK>
+  staleCache: Cache<string, JWK>
 }
 
 type GetJwksOptions = {
