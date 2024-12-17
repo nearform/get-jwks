@@ -23,7 +23,7 @@ const getJwks = buildGetJwks({
   ttl: 60 * 1000,
   timeout: 5000,
   issuersWhitelist: ['https://example.com'],
-  checkIssuer: (issuer) => {
+  checkIssuer: issuer => {
     return issuer === 'https://example.com'
   },
   providerDiscovery: false,
@@ -101,6 +101,10 @@ const getJwks = buildGetJwks()
 
 fastify.register(fjwt, {
   decode: { complete: true },
+  issuersWhitelist: ['https://example.com'],
+  checkIssuer: issuer => {
+    return issuer === 'https://example.com'
+  },
   secret: (request, token, callback) => {
     const {
       header: { kid, alg },
