@@ -153,3 +153,5 @@ const verifyWithPromise = createVerifier({
 
 const payload = await verifyWithPromise(token)
 ```
+
+[![banner](https://oss.nearform.com/images/banners/wide-branded-deep-navy.svg)](https://commerce.nearform.com/contact?lead_source_2_0=Open%20Source)
