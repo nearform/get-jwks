@@ -154,4 +154,4 @@ const verifyWithPromise = createVerifier({
 const payload = await verifyWithPromise(token)
 ```
 
-[![banner](https://raw.githubusercontent.com/nearform/.github/refs/heads/master/assets/os-banner-green.svg)](https://commerce.nearform.com/contact?lead_source_2_0=Open%20Source)
+[![banner](https://raw.githubusercontent.com/nearform/.github/refs/heads/master/assets/os-banner-green.svg)](https://www.nearform.com/contact/?utm_source=open-source&utm_medium=banner&utm_campaign=os-project-pages)
