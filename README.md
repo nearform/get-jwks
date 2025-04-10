@@ -43,7 +43,7 @@ const getJwks = buildGetJwks({
 - `checkIssuer`: Optional user defined function to validate a token's domain.
 - `providerDiscovery`: Indicates if the Provider Configuration Information is used to automatically get the jwks_uri from the [OpenID Provider Discovery Endpoint](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig). This endpoint is exposing the [Provider Metadata](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata). With this flag set to true the domain will be treated as the OpenID Issuer which is the iss property in the token. Defaults to false. Ignored if jwksPath is specified.
 - `jwksPath`: Specify a relative path to the jwks_uri. Example `/otherdir/jwks.json`. Takes precedence over providerDiscovery. Optional.
-- `fetchOptions`: The custom [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) used to instrument `fetch`. Optional.
+- `fetchOptions`: The custom [RequestInit](https://github.com/nodejs/undici/blob/c29be3b62702642d2ab505502e740d3212ed4b25/types/fetch.d.ts#L121) used to instrument `fetch`. Optional.
 
 > `max` and `ttl` are provided to [lru-cache](https://www.npmjs.com/package/lru-cache).
 
