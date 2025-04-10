@@ -27,9 +27,11 @@ const getJwks = buildGetJwks({
     return issuer === 'https://example.com'
   },
   providerDiscovery: false,
-  agent: new https.Agent({
-    keepAlive: true,
-  }),
+  fetchOptions: {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  },
 })
 ```
 
@@ -41,7 +43,7 @@ const getJwks = buildGetJwks({
 - `checkIssuer`: Optional user defined function to validate a token's domain.
 - `providerDiscovery`: Indicates if the Provider Configuration Information is used to automatically get the jwks_uri from the [OpenID Provider Discovery Endpoint](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig). This endpoint is exposing the [Provider Metadata](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata). With this flag set to true the domain will be treated as the OpenID Issuer which is the iss property in the token. Defaults to false. Ignored if jwksPath is specified.
 - `jwksPath`: Specify a relative path to the jwks_uri. Example `/otherdir/jwks.json`. Takes precedence over providerDiscovery. Optional.
-- `agent`: The custom agent to use for requests, as specified in [node-fetch documentation](https://github.com/node-fetch/node-fetch#custom-agent). Defaults to `null`.
+- `fetchOptions`: The custom [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) used to instrument `fetch`. Optional.
 
 > `max` and `ttl` are provided to [lru-cache](https://www.npmjs.com/package/lru-cache).
 
