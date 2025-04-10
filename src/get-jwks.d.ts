@@ -1,4 +1,4 @@
-import Cache from './cache'
+import Cache from './cache';
 
 type GetPublicKeyOptions = {
   domain?: string
@@ -23,7 +23,7 @@ type GetJwksOptions = {
   issuersWhitelist?: string[]
   providerDiscovery?: boolean
   jwksPath?: string
-  fetchOptions?: RequestInit
+  fetchOptions?: import("undici-types").RequestInit
 }
 
 declare namespace buildGetJwks {
