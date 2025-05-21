@@ -91,7 +91,7 @@ This library can be easily used with other JWT libraries.
 
 [@fastify/jwt](https://github.com/fastify/fastify-jwt) is a Json Web Token plugin for [Fastify](https://www.fastify.io/).
 
-The following example includes a scenario where you'd like to varify a JWT against a valid JWK on any request to your Fastify server. Any request with a valid JWT auth token in the header will return a successful response, otherwise will respond with an authentication error.
+The following example includes a scenario where you'd like to verify a JWT against a valid JWK on any request to your Fastify server. Any request with a valid JWT auth token in the header will return a successful response, otherwise will respond with an authentication error.
 
 ```js
 const Fastify = require('fastify')
