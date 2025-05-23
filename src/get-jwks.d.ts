@@ -23,7 +23,7 @@ type GetJwksOptions = {
   issuersWhitelist?: string[]
   providerDiscovery?: boolean
   jwksPath?: string
-  fetchOptions?: import("undici-types").RequestInit
+  fetchOptions?: import("undici").RequestInit
 }
 
 declare namespace buildGetJwks {
