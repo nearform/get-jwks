@@ -1,6 +1,6 @@
 {
   "name": "get-jwks",
-  "version": "11.0.1",
+  "version": "11.0.2",
   "description": "Fetch utils for JWKS keys",
   "main": "src/get-jwks.js",
   "types": "./src/get-jwks.d.ts",
