@@ -1,7 +1,7 @@
 import { expectAssignable } from 'tsd'
-import { getGlobalDispatcher } from 'undici'
 import Cache from '../../src/cache'
 import buildGetJwks, { GetJwksOptions, GetPublicKeyOptions, JWK, JWKSignature } from '../../src/get-jwks'
+import * as undici from "undici-types";
 
 const { getPublicKey, getJwk, getJwksUri, cache, staleCache } = buildGetJwks()
 
@@ -11,5 +11,5 @@ expectAssignable<(options?: GetPublicKeyOptions) => Promise<string>>(getPublicKe
 expectAssignable<Cache<string, JWK>>(cache)
 expectAssignable<Cache<string, JWK>>(staleCache)
 expectAssignable<GetJwksOptions['fetchOptions']>({
-    dispatcher: getGlobalDispatcher()
+    dispatcher: undici.getGlobalDispatcher()
 })
