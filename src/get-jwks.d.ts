@@ -10,6 +10,7 @@ type JWKSignature = { domain: string; alg: string; kid: string }
 type JWK = { [key: string]: any; domain: string; alg: string; kid: string }
 
 type GetJwks = {
+  generateCacheKey: (alg: string, kid: string, normalizedDomain: string) => string
   getPublicKey: (options?: GetPublicKeyOptions) => Promise<string>
   getJwk: (signature: JWKSignature) => Promise<JWK>
   getJwksUri: (normalizedDomain: string) => Promise<string>

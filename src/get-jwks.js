@@ -7,6 +7,7 @@ const { errorCode, GetJwksError } = require('./error')
 
 const ONE_MINUTE = 60 * 1000
 const FIVE_SECONDS = 5 * 1000
+const CACHE_KEY_DELIMITER = ':'
 
 function ensureTrailingSlash(domain) {
   return domain[domain.length - 1] === '/' ? domain : `${domain}/`
@@ -32,6 +33,11 @@ function buildGetJwks(options = {}) {
     ttl,
     dispose: (value, key) => staleCache.set(key, value),
   })
+
+  function generateCacheKey(alg, kid, normalizedDomain) {
+    const encodedKeyParts = [alg, kid, normalizedDomain].map(encodeURIComponent)
+    return encodedKeyParts.join(CACHE_KEY_DELIMITER)
+  }
 
   async function getJwksUri(normalizedDomain) {
     const response = await fetch(
@@ -73,7 +79,7 @@ function buildGetJwks(options = {}) {
       return Promise.reject(error)
     }
 
-    const cacheKey = `${alg}:${kid}:${normalizedDomain}`
+    const cacheKey = generateCacheKey(alg, kid, normalizedDomain)
     const cachedJwk = cache.get(cacheKey)
 
     if (cachedJwk) {
@@ -134,6 +140,7 @@ function buildGetJwks(options = {}) {
   }
 
   return {
+    generateCacheKey,
     getPublicKey,
     getJwk,
     getJwksUri,
