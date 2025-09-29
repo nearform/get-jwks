@@ -1,4 +1,5 @@
 import Cache from './cache';
+import * as undici from "undici-types";
 
 type GetPublicKeyOptions = {
   domain?: string
@@ -24,7 +25,7 @@ type GetJwksOptions = {
   issuersWhitelist?: string[]
   providerDiscovery?: boolean
   jwksPath?: string
-  fetchOptions?: import("undici").RequestInit
+  fetchOptions?: undici.RequestInit
 }
 
 declare namespace buildGetJwks {
