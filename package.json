@@ -44,7 +44,7 @@
     "jsonwebtoken": "^9.0.2",
     "nock": "^v14.0.14",
     "prettier": "^3.5.3",
-    "sinon": "^21.0.0",
+    "sinon": "^22.0.0",
     "tsd": "^0.33.0",
     "typescript": "^6.0.2"
   }
