@@ -10,11 +10,8 @@
   "engines": {
     "node": ">=20"
   },
-  "tsd": {
-    "directory": "./test/types"
-  },
   "scripts": {
-    "test": "node --test test/*.spec.js && tsd",
+    "test": "node --test test/*.spec.js && tstyche",
     "lint": "eslint ."
   },
   "repository": {
@@ -45,7 +42,7 @@
     "nock": "^v14.0.15",
     "prettier": "^3.5.3",
     "sinon": "^22.0.0",
-    "tsd": "^0.33.0",
+    "tstyche": "^7.1.0",
     "typescript": "^6.0.2"
   }
 }
