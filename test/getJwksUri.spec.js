@@ -1,7 +1,7 @@
 'use strict'
 
 const { beforeEach, afterEach, test, describe } = require('node:test')
-const nock = require('nock')
+const { default: nock } = require('nock')
 
 const { domain } = require('./constants')
 

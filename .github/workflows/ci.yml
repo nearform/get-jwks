@@ -9,6 +9,7 @@ jobs:
     uses: pkgjs/action/.github/workflows/node-test.yaml@v0
     with:
       strategy-fail-fast: true
+      exclude: '[{"node-version": 20}]'
       test-command: npm run lint && npm run test
   automerge:
     needs: build
