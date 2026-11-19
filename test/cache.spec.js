@@ -1,7 +1,7 @@
 'use strict'
 
 const {test} = require('node:test')
-const nock = require('nock')
+const { default: nock } = require('nock')
 const jwkToPem = require('jwk-to-pem')
 
 const { jwks, domain } = require('./constants')
