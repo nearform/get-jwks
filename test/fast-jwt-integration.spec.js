@@ -1,7 +1,7 @@
 'use strict'
 
 const {beforeEach, afterEach, test} = require('node:test')
-const nock = require('nock')
+const { default: nock } = require('nock')
 const { createVerifier } = require('fast-jwt')
 
 const { jwks, token } = require('./constants')

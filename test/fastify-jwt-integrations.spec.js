@@ -1,7 +1,7 @@
 'use strict'
 
 const { beforeEach, afterEach, test } = require('node:test')
-const nock = require('nock')
+const { default: nock } = require('nock')
 const Fastify = require('fastify')
 const fjwt = require('@fastify/jwt')
 
